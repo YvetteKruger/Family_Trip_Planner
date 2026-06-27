@@ -1,0 +1,1958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🇪🇺 European Family Visit Planner</title>
+  <style>
+    :root {
+      --red: #6ba3be;
+      --bg: #f0f6fb;
+      --card: #ffffff;
+      --text: #2c3e50;
+      --muted: #7f9aad;
+      --border: #d6e8f0;
+      --accent-light: #deeef7;
+      --blue: #3b82a0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* HEADER */
+    .header { background: var(--red); color: white; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.18); }
+    .header h1 { font-size: 1.25rem; font-weight: 800; }
+    .header-sub { font-size: 0.78rem; opacity: 0.85; margin-top: 2px; }
+    .trip-pill { background: rgba(255,255,255,0.22); border-radius: 20px; padding: 5px 14px; font-size: 0.82rem; font-weight: 700; text-align: right; }
+    .progress-bar { height: 6px; background: rgba(255,255,255,0.28); border-radius: 3px; overflow: hidden; margin-top: 5px; width: 140px; margin-left: auto; }
+    .progress-fill { height: 100%; background: white; border-radius: 3px; transition: width 0.4s; }
+
+    /* NAV */
+    .nav { background: white; display: flex; border-bottom: 2px solid var(--border); overflow-x: auto; position: sticky; top: 0; z-index: 100; }
+    .nav-btn { padding: 13px 18px; border: none; background: none; cursor: pointer; font-size: 0.88rem; color: var(--muted); white-space: nowrap; border-bottom: 3px solid transparent; margin-bottom: -2px; font-family: inherit; transition: all 0.18s; }
+    .nav-btn.active { color: var(--red); border-bottom-color: var(--red); font-weight: 700; }
+    .nav-btn:hover { color: var(--red); background: var(--accent-light); }
+
+    /* MAIN */
+    .main { max-width: 860px; margin: 0 auto; padding: 20px 14px 40px; }
+    .tab { display: none; }
+    .tab.active { display: block; }
+
+    /* CARDS */
+    .card { background: var(--card); border-radius: 14px; padding: 18px 20px; margin-bottom: 14px; box-shadow: 0 1px 5px rgba(0,0,0,0.06); border: 1px solid var(--border); }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .card-title { font-size: 0.98rem; font-weight: 700; }
+    .section-title { font-size: 1.05rem; font-weight: 800; color: var(--text); padding: 4px 0 10px; border-bottom: 2px solid var(--border); margin-bottom: 14px; }
+
+    /* STATS */
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px; }
+    .stat-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+    .stat-num { font-size: 1.9rem; font-weight: 900; color: var(--red); line-height: 1; }
+    .stat-label { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+
+    /* BUTTONS */
+    .btn { padding: 9px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.88rem; font-weight: 600; font-family: inherit; transition: all 0.18s; }
+    .btn-primary { background: var(--red); color: white; }
+    .btn-primary:hover { background: #a0091f; }
+    .btn-secondary { background: #f3f4f6; color: var(--text); }
+    .btn-secondary:hover { background: #e5e7eb; }
+    .btn-ghost { background: none; color: var(--red); border: 1.5px solid var(--red); }
+    .btn-ghost:hover { background: var(--accent-light); }
+    .btn-sm { padding: 5px 11px; font-size: 0.8rem; }
+    .btn:disabled { opacity: 0.45; cursor: default; }
+
+    /* FORM */
+    .input, .select, .textarea { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.88rem; font-family: inherit; color: var(--text); background: white; transition: border-color 0.15s; }
+    .input:focus, .select:focus, .textarea:focus { outline: none; border-color: var(--red); }
+    label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .form-group { margin-bottom: 12px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    @media (max-width: 580px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } .stats-row { grid-template-columns: 1fr 1fr; } }
+
+    /* ACTIVITY ITEMS */
+    .activity-item { display: flex; align-items: flex-start; gap: 12px; padding: 13px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 9px; background: white; transition: box-shadow 0.18s; }
+    .activity-item:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+    .act-emoji { font-size: 1.5rem; flex-shrink: 0; margin-top: 1px; }
+    .act-body { flex: 1; min-width: 0; }
+    .act-title { font-weight: 700; font-size: 0.93rem; }
+    .act-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.45; margin-top: 3px; }
+    .act-meta { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+    /* TAGS */
+    .tag { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 0.72rem; font-weight: 700; margin: 2px 2px 0 0; }
+    .tag-outdoor { background: #d1fae5; color: #065f46; }
+    .tag-indoor { background: #dbeafe; color: #1e40af; }
+    .tag-food { background: #fef3c7; color: #92400e; }
+    .tag-history { background: #ede9fe; color: #4c1d95; }
+    .tag-free { background: #f0fdf4; color: #14532d; border: 1px solid #86efac; }
+    .tag-rainy { background: #e0f2fe; color: #0c4a6e; }
+    .tag-family { background: #fff7ed; color: #9a3412; }
+    .tag-beach { background: #f0fdfa; color: #134e4a; }
+    .tag-night { background: #1e1b4b; color: #a5b4fc; }
+    .tag-kids { background: #fdf4ff; color: #701a75; }
+
+    /* CALENDAR */
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+    .cal-head { text-align: center; font-size: 0.72rem; font-weight: 800; color: var(--muted); padding: 6px 2px; text-transform: uppercase; }
+    .cal-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 7px; cursor: pointer; font-size: 0.82rem; border: 1.5px solid transparent; transition: all 0.12s; position: relative; min-height: 38px; }
+    .cal-day:hover { background: var(--accent-light); }
+    .cal-day.today { border-color: var(--red); font-weight: 800; color: var(--red); }
+    .cal-day.in-trip { background: #fce7eb; }
+    .cal-day.has-activity::after { content: ''; width: 5px; height: 5px; background: var(--red); border-radius: 50%; position: absolute; bottom: 3px; }
+    .cal-day.selected { background: var(--red) !important; color: white !important; border-color: var(--red); }
+    .cal-day.selected.has-activity::after { background: white; }
+    .cal-day.other-month { opacity: 0.25; cursor: default; }
+    .cal-day.disabled { opacity: 0.2; cursor: default; }
+    .cal-day.drag-over { background: #fce7eb !important; border-color: var(--red) !important; transform: scale(1.1); box-shadow: 0 0 0 3px rgba(198,12,48,0.3); z-index: 2; }
+
+    /* DRAG & DROP */
+    .drag-handle { cursor: grab; color: var(--muted); font-size: 1.1rem; flex-shrink: 0; padding: 2px 6px 2px 0; user-select: none; line-height: 1; }
+    .drag-handle:hover { color: var(--red); }
+    .drag-handle:active { cursor: grabbing; }
+    .activity-item.dragging { opacity: 0.4; border: 1.5px dashed var(--red); }
+    .drag-hint { font-size: 0.76rem; color: var(--muted); text-align: center; padding: 5px 0 2px; font-style: italic; }
+
+    /* WEATHER */
+    .weather-link { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; background: #f0f9ff; border: 1.5px solid #bae6fd; border-radius: 9px; color: #0369a1; text-decoration: none; font-size: 0.83rem; font-weight: 700; transition: all 0.18s; }
+    .weather-link:hover { background: #e0f2fe; transform: translateY(-1px); }
+    .weather-links { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    /* STAY CARD */
+    .stay-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 10px; }
+    .stay-loc { font-size: 1.05rem; font-weight: 800; }
+    .stay-dates { color: var(--red); font-size: 0.85rem; font-weight: 600; margin-top: 4px; }
+    .stay-detail { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+
+    /* MISC */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+    .empty-state { text-align: center; padding: 36px 16px; color: var(--muted); }
+    .empty-state .big { font-size: 2.5rem; margin-bottom: 10px; }
+    .badge { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; background: var(--accent-light); color: var(--red); }
+    .flex { display: flex; align-items: center; }
+    .gap-2 { gap: 8px; }
+    .gap-1 { gap: 5px; }
+    .text-sm { font-size: 0.83rem; }
+    .text-muted { color: var(--muted); }
+    .font-bold { font-weight: 700; }
+    .mt-2 { margin-top: 8px; }
+    .mt-3 { margin-top: 12px; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #111827; color: white; padding: 10px 18px; border-radius: 10px; font-size: 0.88rem; z-index: 9999; opacity: 0; transform: translateY(16px); transition: all 0.28s; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* Day panel */
+    .day-panel { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-top: 14px; }
+    .day-panel-title { font-size: 1.05rem; font-weight: 800; margin-bottom: 4px; }
+
+    /* Quick picks */
+    .quick-pick { display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; border: 1.5px solid var(--border); background: white; cursor: pointer; margin: 3px; transition: all 0.15s; }
+    .quick-pick:hover { border-color: var(--red); color: var(--red); background: var(--accent-light); }
+
+    .idea-item { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); gap: 10px; }
+    .idea-item:last-child { border-bottom: none; }
+
+    /* Collapsible stays timeline */
+    .timeline { position: relative; padding-left: 20px; }
+    .timeline::before { content: ''; position: absolute; left: 6px; top: 6px; bottom: 6px; width: 2px; background: var(--border); }
+    .timeline-item { position: relative; margin-bottom: 12px; }
+    .timeline-dot { position: absolute; left: -17px; top: 4px; width: 10px; height: 10px; background: var(--red); border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 2px var(--red); }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* LOGIN OVERLAY */
+    .login-overlay { position: fixed; inset: 0; background: linear-gradient(145deg,#C60C30 0%,#8b0821 100%); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; overflow-y: auto; }
+    .login-overlay h1 { font-size: 1.5rem; font-weight: 900; color: white; text-align: center; }
+    .login-overlay p { color: rgba(255,255,255,0.8); font-size: 0.9rem; text-align: center; margin-top: 6px; }
+    .profile-card { width: 100%; max-width: 400px; background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.35); border-radius: 14px; padding: 15px 20px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; gap: 16px; transition: all 0.18s; }
+    .profile-card:hover { background: rgba(255,255,255,0.28); transform: translateY(-1px); }
+    .profile-card.owner { border-color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.22); }
+    .profile-avatar { font-size: 2rem; }
+    .profile-name { color: white; font-weight: 800; font-size: 1rem; }
+    .profile-role { color: rgba(255,255,255,0.72); font-size: 0.8rem; }
+    .profile-delete { margin-left: auto; background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; font-size: 1.2rem; line-height: 1; padding: 4px; }
+    .profile-delete:hover { color: white; }
+    .login-input { background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.35); color: white; border-radius: 8px; padding: 9px 12px; font-size: 0.88rem; font-family: inherit; width: 100%; }
+    .login-input::placeholder { color: rgba(255,255,255,0.5); }
+    .login-input:focus { outline: none; border-color: white; background: rgba(255,255,255,0.22); }
+    .login-btn { padding: 9px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 700; font-family: inherit; transition: all 0.18s; }
+    .login-btn-white { background: white; color: var(--red); }
+    .login-btn-outline { background: rgba(255,255,255,0.15); color: white; border: 1.5px solid rgba(255,255,255,0.4); }
+    .login-btn:hover { opacity: 0.88; }
+
+    /* LOCKED BANNER */
+    .locked-banner { background: #d1fae5; border: 2px solid #10b981; border-radius: 12px; padding: 14px 18px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
+    .locked-banner .lock-icon { font-size: 1.5rem; }
+
+    /* WISH CARD */
+    .wish-card { display: flex; align-items: flex-start; gap: 12px; padding: 13px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 9px; background: white; }
+    .wish-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+    .dot-pending { background: #f59e0b; }
+    .dot-approved { background: #10b981; }
+    .dot-declined { background: #ef4444; }
+
+    /* TRIP LABEL CHIP */
+    .trip-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--accent-light); color: var(--red); padding: 4px 12px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; margin: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN OVERLAY -->
+<div class="login-overlay" id="loginOverlay">
+  <div style="text-align:center;margin-bottom:28px">
+    <div style="font-size:3.5rem;margin-bottom:8px">🇪🇺</div>
+    <h1>European Family Planner</h1>
+    <p>Who are you? Pick your profile to continue.</p>
+  </div>
+  <div id="profileCards" style="width:100%;max-width:400px"></div>
+  <div style="width:100%;max-width:400px;margin-top:20px">
+    <div style="font-size:0.8rem;color:rgba(255,255,255,0.65);text-align:center;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:700">Add new person</div>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <input id="newProfileName" class="login-input" placeholder="Name…">
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="login-btn login-btn-white" style="flex:1" onclick="addProfile(true)">👑 Add as Owner</button>
+      <button class="login-btn login-btn-outline" style="flex:1" onclick="addProfile(false)">👤 Add as Family</button>
+    </div>
+    <p style="color:rgba(255,255,255,0.5);font-size:0.75rem;text-align:center;margin-top:10px">Owner = full planning access · Family = view &amp; suggest only</p>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <h1>🇪🇺 European Family Planner</h1>
+    <div class="header-sub" id="headerSub">Mor &amp; Far's Summer 2025 Visit</div>
+  </div>
+  <div style="text-align:right">
+    <div class="trip-pill" id="tripPill">Loading…</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div id="profilePill" style="font-size:0.72rem;opacity:0.8;margin-top:4px;cursor:pointer" onclick="switchProfile()"></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button class="nav-btn active" onclick="showTab('dashboard',this)">🏠 Home</button>
+  <button class="nav-btn" onclick="showTab('trips',this)">✈️ Trips</button>
+  <button class="nav-btn" onclick="showTab('stays',this)">📍 My Stays</button>
+  <button class="nav-btn" onclick="showTab('itinerary',this)">📅 Itinerary</button>
+  <button class="nav-btn" onclick="showTab('discover',this)">🗺️ Discover</button>
+  <button class="nav-btn" onclick="showTab('ask',this)">💬 Ask</button>
+  <button class="nav-btn" onclick="showTab('family',this)" id="familyNavBtn">👨‍👩‍👧 Family</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- ====== DASHBOARD ====== -->
+  <div class="tab active" id="tab-dashboard">
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-num" id="statTotal">—</div>
+        <div class="stat-label">Days in Denmark</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="statDone">—</div>
+        <div class="stat-label">Days Completed</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="statLeft">—</div>
+        <div class="stat-label">Days Remaining</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🗓️ Trip Period</div>
+        <button class="btn btn-ghost btn-sm" onclick="editTripDates()">Edit dates</button>
+      </div>
+      <div id="tripDateDisplay" class="text-sm text-muted"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:10px">📍 Right Now</div>
+      <div id="nowLocation" style="font-size:1.1rem;font-weight:800">—</div>
+      <div id="nowDetail" class="text-sm text-muted mt-2"></div>
+      <div id="nowWeather" class="mt-2"></div>
+    </div>
+
+    <div class="card" id="quickAddCard">
+      <div class="card-header">
+        <div class="card-title">⚡ Quick Add to Itinerary</div>
+      </div>
+      <div class="form-group">
+        <label>Activity Name</label>
+        <input class="input" id="qTitle" placeholder="e.g. Visit Tivoli Gardens">
+      </div>
+      <div class="grid-3">
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" class="input" id="qDate">
+        </div>
+        <div class="form-group">
+          <label>Time (optional)</label>
+          <input type="time" class="input" id="qTime">
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select class="select" id="qCategory">
+            <option value="outdoor">🌿 Outdoor</option>
+            <option value="indoor">🏛️ Indoor</option>
+            <option value="food">🍽️ Food</option>
+            <option value="history">🏰 History</option>
+            <option value="beach">🏖️ Beach</option>
+            <option value="family">👨‍👩‍👧 Family</option>
+            <option value="night">🌙 Evening</option>
+            <option value="free">🎉 Free</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Notes (optional)</label>
+        <input class="input" id="qNotes" placeholder="Any extra details or booking info…">
+      </div>
+      <button class="btn btn-primary" onclick="quickAdd()">Add to Itinerary</button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">✨ Suggestions for Today</div>
+        <button class="btn btn-secondary btn-sm" onclick="refreshSuggestions()">Refresh</button>
+      </div>
+      <div id="todaySuggestions"></div>
+    </div>
+
+  </div>
+
+  <!-- ====== STAYS ====== -->
+  <div class="tab" id="tab-stays">
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:14px">➕ Add a Stay Period</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>City / Area</label>
+          <select class="select" id="stayCity" onchange="toggleCustomCity()">
+            <option value="">— Select city / area —</option>
+            <optgroup label="🇩🇰 Denmark">
+              <option value="Copenhagen">Copenhagen</option>
+              <option value="Frederiksberg">Frederiksberg</option>
+              <option value="Helsingør">Helsingør / North Zealand</option>
+              <option value="Roskilde">Roskilde</option>
+              <option value="Odense">Odense</option>
+              <option value="Aarhus">Aarhus</option>
+              <option value="Aalborg">Aalborg</option>
+              <option value="Skagen">Skagen</option>
+              <option value="Bornholm">Bornholm</option>
+              <option value="Silkeborg">Silkeborg / Lake District</option>
+              <option value="Vejle">Vejle / Jutland</option>
+            </optgroup>
+            <optgroup label="🇫🇷 France">
+              <option value="Paris">Paris</option>
+              <option value="Nice">Nice</option>
+              <option value="Lyon">Lyon</option>
+              <option value="Bordeaux">Bordeaux</option>
+              <option value="Marseille">Marseille</option>
+            </optgroup>
+            <optgroup label="🇩🇪 Germany">
+              <option value="Berlin">Berlin</option>
+              <option value="Munich">Munich</option>
+              <option value="Hamburg">Hamburg</option>
+              <option value="Cologne">Cologne</option>
+            </optgroup>
+            <optgroup label="🇮🇹 Italy">
+              <option value="Rome">Rome</option>
+              <option value="Florence">Florence</option>
+              <option value="Venice">Venice</option>
+              <option value="Milan">Milan</option>
+            </optgroup>
+            <optgroup label="🇪🇸 Spain">
+              <option value="Barcelona">Barcelona</option>
+              <option value="Madrid">Madrid</option>
+              <option value="Seville">Seville</option>
+              <option value="Malaga">Malaga / Costa del Sol</option>
+            </optgroup>
+            <optgroup label="🇳🇱 Netherlands">
+              <option value="Amsterdam">Amsterdam</option>
+              <option value="The Hague">The Hague</option>
+            </optgroup>
+            <optgroup label="🇦🇹 Austria">
+              <option value="Vienna">Vienna</option>
+              <option value="Salzburg">Salzburg</option>
+              <option value="Innsbruck">Innsbruck</option>
+            </optgroup>
+            <optgroup label="🇨🇿 Czech Republic">
+              <option value="Prague">Prague</option>
+            </optgroup>
+            <optgroup label="🇵🇹 Portugal">
+              <option value="Lisbon">Lisbon</option>
+              <option value="Porto">Porto</option>
+            </optgroup>
+            <optgroup label="🇬🇷 Greece">
+              <option value="Athens">Athens</option>
+              <option value="Santorini">Santorini</option>
+              <option value="Crete">Crete</option>
+            </optgroup>
+            <optgroup label="🇸🇪 Sweden">
+              <option value="Stockholm">Stockholm</option>
+              <option value="Gothenburg">Gothenburg</option>
+            </optgroup>
+            <optgroup label="🇧🇪 Belgium">
+              <option value="Brussels">Brussels</option>
+              <option value="Bruges">Bruges</option>
+            </optgroup>
+            <optgroup label="🇨🇭 Switzerland">
+              <option value="Zurich">Zurich</option>
+              <option value="Geneva">Geneva</option>
+              <option value="Interlaken">Interlaken</option>
+            </optgroup>
+            <optgroup label="🇳🇴 Norway">
+              <option value="Oslo">Oslo</option>
+              <option value="Bergen">Bergen</option>
+            </optgroup>
+            <optgroup label="🇮🇸 Iceland">
+              <option value="Reykjavik">Reykjavik</option>
+            </optgroup>
+            <optgroup label="🇵🇱 Poland">
+              <option value="Krakow">Krakow</option>
+              <option value="Warsaw">Warsaw</option>
+            </optgroup>
+            <optgroup label="🇭🇺 Hungary">
+              <option value="Budapest">Budapest</option>
+            </optgroup>
+            <option value="other">✏️ Other (type below)</option>
+          </select>
+        </div>
+        <div class="form-group" id="customCityWrap" style="display:none">
+          <label>Custom Location Name</label>
+          <input class="input" id="stayCustomCity" placeholder="e.g. Hornbæk">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Neighbourhood / Address (optional)</label>
+        <input class="input" id="stayNeighbourhood" placeholder="e.g. Nørrebro, or Strandvejen 42">
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Arriving</label>
+          <input type="date" class="input" id="stayFrom">
+        </div>
+        <div class="form-group">
+          <label>Leaving</label>
+          <input type="date" class="input" id="stayTo">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Accommodation (optional)</label>
+        <input class="input" id="stayAccomm" placeholder="Hotel name or Airbnb address">
+      </div>
+      <button class="btn btn-primary" onclick="addStay()">Save Stay Period</button>
+    </div>
+
+    <div id="staysList"></div>
+
+  </div>
+
+  <!-- ====== ITINERARY ====== -->
+  <div class="tab" id="tab-itinerary">
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title" id="calMonthLabel"></div>
+        <div class="flex gap-2">
+          <button class="btn btn-secondary btn-sm" onclick="prevMonth()">‹ Prev</button>
+          <button class="btn btn-secondary btn-sm" onclick="nextMonth()">Next ›</button>
+        </div>
+      </div>
+      <div class="calendar-grid" id="calGrid"></div>
+    </div>
+
+    <div id="dayPanelWrap"></div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📋 All Planned Activities</div>
+        <span class="badge" id="actCount">0</span>
+      </div>
+      <div id="allActList"></div>
+    </div>
+
+  </div>
+
+  <!-- ====== DISCOVER ====== -->
+  <div class="tab" id="tab-discover">
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🗺️ Browse Activities</div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group mb-0">
+          <label>Filter by Area</label>
+          <select class="select" id="discCity" onchange="renderDiscover()">
+            <option value="all">All Destinations</option>
+            <optgroup label="🇩🇰 Denmark">
+              <option value="Copenhagen">Copenhagen</option>
+              <option value="Frederiksberg">Frederiksberg</option>
+              <option value="Helsingør">Helsingør</option>
+              <option value="Roskilde">Roskilde</option>
+              <option value="Odense">Odense</option>
+              <option value="Aarhus">Aarhus</option>
+              <option value="Aalborg">Aalborg</option>
+              <option value="Skagen">Skagen</option>
+              <option value="Bornholm">Bornholm</option>
+              <option value="Silkeborg">Silkeborg</option>
+              <option value="Nationwide">Anywhere in Denmark</option>
+            </optgroup>
+            <optgroup label="🇫🇷 France">
+              <option value="Paris">Paris</option>
+              <option value="Nice">Nice</option>
+            </optgroup>
+            <optgroup label="🇩🇪 Germany">
+              <option value="Berlin">Berlin</option>
+              <option value="Munich">Munich</option>
+            </optgroup>
+            <optgroup label="🇮🇹 Italy">
+              <option value="Rome">Rome</option>
+              <option value="Florence">Florence</option>
+              <option value="Venice">Venice</option>
+            </optgroup>
+            <optgroup label="🇪🇸 Spain">
+              <option value="Barcelona">Barcelona</option>
+              <option value="Madrid">Madrid</option>
+            </optgroup>
+            <optgroup label="🇳🇱 Netherlands">
+              <option value="Amsterdam">Amsterdam</option>
+            </optgroup>
+            <optgroup label="🇦🇹 Austria">
+              <option value="Vienna">Vienna</option>
+              <option value="Salzburg">Salzburg</option>
+            </optgroup>
+            <optgroup label="🇨🇿 Czech Republic">
+              <option value="Prague">Prague</option>
+            </optgroup>
+            <optgroup label="🇵🇹 Portugal">
+              <option value="Lisbon">Lisbon</option>
+              <option value="Porto">Porto</option>
+            </optgroup>
+            <optgroup label="🇬🇷 Greece">
+              <option value="Athens">Athens</option>
+              <option value="Santorini">Santorini</option>
+            </optgroup>
+            <optgroup label="🇸🇪 Sweden">
+              <option value="Stockholm">Stockholm</option>
+            </optgroup>
+            <optgroup label="🇧🇪 Belgium">
+              <option value="Brussels">Brussels</option>
+              <option value="Bruges">Bruges</option>
+            </optgroup>
+            <optgroup label="🇨🇭 Switzerland">
+              <option value="Zurich">Zurich</option>
+              <option value="Interlaken">Interlaken</option>
+            </optgroup>
+            <optgroup label="🇳🇴 Norway">
+              <option value="Oslo">Oslo</option>
+              <option value="Bergen">Bergen</option>
+            </optgroup>
+            <optgroup label="🇮🇸 Iceland">
+              <option value="Reykjavik">Reykjavik</option>
+            </optgroup>
+            <optgroup label="🇵🇱 Poland">
+              <option value="Krakow">Krakow</option>
+            </optgroup>
+            <optgroup label="🇭🇺 Hungary">
+              <option value="Budapest">Budapest</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="form-group mb-0">
+          <label>Filter by Type</label>
+          <select class="select" id="discCat" onchange="renderDiscover()">
+            <option value="all">All Types</option>
+            <option value="outdoor">🌿 Outdoor</option>
+            <option value="indoor">🏛️ Indoor</option>
+            <option value="food">🍽️ Food</option>
+            <option value="history">🏰 History</option>
+            <option value="beach">🏖️ Beach</option>
+            <option value="family">👨‍👩‍👧 Family</option>
+            <option value="night">🌙 Evening</option>
+            <option value="free">🎉 Free</option>
+            <option value="rainy">🌧️ Rainy Day</option>
+            <option value="kids">🧒 Kids</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div id="discoverResults"></div>
+
+  </div>
+
+  <!-- ====== ASK ====== -->
+  <div class="tab" id="tab-ask">
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:8px">💬 Ask for Recommendations</div>
+      <p class="text-sm text-muted" style="margin-bottom:12px">Type a question or keyword — the app will find matching activities.</p>
+      <div class="flex gap-2">
+        <input class="input" id="askInput" placeholder="e.g. something to do outside, rainy day ideas, free activities…" onkeydown="if(event.key==='Enter')doAsk()">
+        <button class="btn btn-primary" onclick="doAsk()">Ask</button>
+      </div>
+      <div style="margin-top:12px">
+        <div style="font-size:0.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Quick picks</div>
+        <div>
+          <span class="quick-pick" onclick="ask('outdoor activities')">🌿 Outdoor</span>
+          <span class="quick-pick" onclick="ask('rainy day indoor')">🌧️ Rainy Day</span>
+          <span class="quick-pick" onclick="ask('free things')">🎉 Free</span>
+          <span class="quick-pick" onclick="ask('beach swimming')">🏖️ Beach</span>
+          <span class="quick-pick" onclick="ask('history museum')">🏛️ History</span>
+          <span class="quick-pick" onclick="ask('food eat restaurant')">🍽️ Food</span>
+          <span class="quick-pick" onclick="ask('kids children family')">🧒 Kids</span>
+          <span class="quick-pick" onclick="ask('evening night out')">🌙 Evening</span>
+          <span class="quick-pick" onclick="ask('Copenhagen')">📍 Copenhagen</span>
+          <span class="quick-pick" onclick="ask('Aarhus')">📍 Aarhus</span>
+          <span class="quick-pick" onclick="ask('Bornholm')">📍 Bornholm</span>
+          <span class="quick-pick" onclick="ask('Skagen')">📍 Skagen</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="askResults"></div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="card-title" style="margin-bottom:8px">📝 My Own Ideas</div>
+      <p class="text-sm text-muted" style="margin-bottom:10px">Things you already know you want to do — save them here.</p>
+      <div class="flex gap-2">
+        <input class="input" id="ideaInput" placeholder="Add an idea…" onkeydown="if(event.key==='Enter')addIdea()">
+        <button class="btn btn-primary" onclick="addIdea()">Save</button>
+      </div>
+      <div id="ideaList" style="margin-top:12px"></div>
+    </div>
+
+  </div>
+
+  <!-- ====== TRIPS ====== -->
+  <div class="tab" id="tab-trips">
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">✈️ Trip Details</div>
+        <span id="tripLockBadge" class="badge">Planning</span>
+      </div>
+      <div class="form-group">
+        <label>Trip Label / Name</label>
+        <input class="input" id="tripNameInput" placeholder="e.g. Mor & Far — Summer Europe 2025">
+      </div>
+      <div class="form-group">
+        <label>Emoji / Icon (optional)</label>
+        <input class="input" id="tripEmojiInput" placeholder="🌍" style="max-width:80px">
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Start Date</label>
+          <input type="date" class="input" id="tripStartInput">
+        </div>
+        <div class="form-group">
+          <label>End Date</label>
+          <input type="date" class="input" id="tripEndInput">
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="saveTripMeta()">Save</button>
+    </div>
+
+    <div class="card">
+      <div class="section-title">📊 Summary</div>
+      <div id="tripSummaryEl"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📁 Saved Snapshots</div>
+        <button class="btn btn-ghost btn-sm" onclick="saveSnapshot()">💾 Save Snapshot</button>
+      </div>
+      <p class="text-sm text-muted" style="margin-bottom:10px">Snapshots preserve a version of your trip so you can go back if needed.</p>
+      <div id="snapshotsList"></div>
+    </div>
+
+  </div>
+
+  <!-- ====== FAMILY ====== -->
+  <div class="tab" id="tab-family">
+
+    <div id="familyLockBanner" style="display:none" class="locked-banner">
+      <div class="lock-icon">🔒</div>
+      <div>
+        <div class="font-bold">Itinerary Locked</div>
+        <div class="text-sm text-muted">The plan is finalised — family can view but not edit.</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="toggleLock()">Unlock</button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">👥 Family Members</div>
+      </div>
+      <div id="memberChips" style="margin-bottom:10px"></div>
+      <div class="flex gap-2">
+        <input class="input" id="memberInput" placeholder="Add family member name…" onkeydown="if(event.key==='Enter')addMember()">
+        <button class="btn btn-primary btn-sm" onclick="addMember()">Add</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🌟 Family Wishlist</div>
+        <select class="select" id="wishFilter" onchange="renderWishlist()" style="width:auto;font-size:0.8rem;padding:5px 8px">
+          <option value="all">All</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="declined">Declined</option>
+        </select>
+      </div>
+      <p class="text-sm text-muted" style="margin-bottom:14px">Anyone can suggest something. As the trip owner, you decide what makes it into the itinerary — and lock it when done.</p>
+
+      <div id="wishFormWrap">
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Who's suggesting?</label>
+            <select class="select" id="wishPerson">
+              <option value="">— Select —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Preferred Date (optional)</label>
+            <input type="date" class="input" id="wishDate">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>What would they love to do?</label>
+          <input class="input" id="wishTitle" placeholder="e.g. See the Eiffel Tower at night" onkeydown="if(event.key==='Enter')addWish()">
+        </div>
+        <div class="form-group">
+          <label>Extra notes (optional)</label>
+          <input class="input" id="wishNotes" placeholder="Any details, links, or reasons why…">
+        </div>
+        <button class="btn btn-primary" onclick="addWish()">Add to Wishlist</button>
+      </div>
+
+      <div id="wishlistItems" style="margin-top:16px"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🔒 Finalise &amp; Share</div>
+        <button class="btn btn-primary btn-sm" id="lockToggleBtn" onclick="toggleLock()">🔒 Lock Plan</button>
+      </div>
+      <p class="text-sm text-muted" style="margin-bottom:14px">Export the trip so family members can open it on their own device, add wishes, and send it back to you to import.</p>
+      <div class="flex gap-2" style="flex-wrap:wrap">
+        <button class="btn btn-ghost" onclick="exportWishlist()">📤 Export for Family</button>
+        <button class="btn btn-secondary" onclick="importWishlist()">📥 Import Family Replies</button>
+      </div>
+      <div id="exportArea" style="display:none;margin-top:14px">
+        <label>Copy this and send to your family:</label>
+        <textarea class="textarea" id="exportText" rows="5" readonly style="font-size:0.74rem;font-family:monospace;margin-top:6px"></textarea>
+        <button class="btn btn-secondary btn-sm" onclick="copyExport()" style="margin-top:8px">📋 Copy to Clipboard</button>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// ACTIVITY DATABASE — Danish experiences pre-loaded
+// ============================================================
+const DB = [
+  // --- COPENHAGEN ---
+  {id:'cpH1',emoji:'🎠',title:'Tivoli Gardens',loc:'Copenhagen',tags:['outdoor','family','night'],desc:'Iconic 1843 amusement park with rides, gardens, concerts and summer evening illuminations. One of Denmark\'s top attractions.',link:'https://www.tivoli.dk/en'},
+  {id:'cpH2',emoji:'⚓',title:'Nyhavn Waterfront',loc:'Copenhagen',tags:['outdoor','food','free'],desc:'Copenhagen\'s most photographed canal — colourful 17th-century houses, boats, and excellent restaurants. Perfect for a long lunch.'},
+  {id:'cpH3',emoji:'🧜',title:'The Little Mermaid Statue',loc:'Copenhagen',tags:['outdoor','history','free'],desc:'Iconic bronze statue inspired by Hans Christian Andersen\'s fairy tale. A classic sightseeing stop, best visited early morning.'},
+  {id:'cpH4',emoji:'🏛️',title:'National Museum of Denmark',loc:'Copenhagen',tags:['indoor','history','rainy','free'],desc:'Denmark\'s largest cultural history museum — Viking artefacts, prehistoric finds, and Danish design. Free entry most days.',link:'https://en.natmus.dk'},
+  {id:'cpH5',emoji:'👑',title:'Rosenborg Castle & Crown Jewels',loc:'Copenhagen',tags:['indoor','history','outdoor'],desc:'Renaissance castle housing the Danish crown jewels and royal regalia. Surrounded by the lovely Kongens Have park (free to enter).'},
+  {id:'cpH6',emoji:'🎨',title:'Louisiana Museum of Modern Art',loc:'Copenhagen',tags:['indoor','outdoor','rainy'],desc:'World-class modern art on the coast north of Copenhagen. Sculpture garden with sea views, and top rotating exhibitions.',link:'https://louisiana.dk/en'},
+  {id:'cpH7',emoji:'🏰',title:'Christiansborg Palace Tower',loc:'Copenhagen',tags:['indoor','history','outdoor'],desc:'Visit the seat of Danish Parliament and climb the tower — the highest point in Copenhagen with stunning 360° views. Tower is FREE.'},
+  {id:'cpH8',emoji:'🌮',title:'Street Food at Reffen',loc:'Copenhagen',tags:['outdoor','food','family'],desc:'Scandinavia\'s largest street food market on the waterfront — 50+ vendors, craft beer, live music and stunning harbour views.'},
+  {id:'cpH9',emoji:'🚣',title:'Canal Kayaking',loc:'Copenhagen',tags:['outdoor','family'],desc:'Explore Copenhagen\'s canals from the water. Rental companies offer guided and self-guided tours — no experience needed.'},
+  {id:'cpH10',emoji:'🏊',title:'Harbour Bath at Islands Brygge',loc:'Copenhagen',tags:['outdoor','beach','free','family'],desc:'Free open-air swimming right in the city harbour! Clean water, diving platforms and sundecks — a true Copenhagen summer must.'},
+  {id:'cpH11',emoji:'🛍️',title:'Strøget & Indre By',loc:'Copenhagen',tags:['outdoor','food','free'],desc:'One of Europe\'s longest pedestrian streets. Great mix of Danish brands, international shops, street food, and atmosphere.'},
+  {id:'cpH12',emoji:'🏘️',title:'Freetown Christiania',loc:'Copenhagen',tags:['outdoor','free'],desc:'Unique self-governing alternative community. Vibrant arts scene, craft workshops, cafes and colourful DIY architecture.'},
+  {id:'cpH13',emoji:'🦁',title:'Copenhagen Zoo',loc:'Copenhagen',tags:['outdoor','family','kids'],desc:'Home to 3,000+ animals including the iconic Norman Foster elephant house. A wonderful full-day family outing.'},
+  {id:'cpH14',emoji:'🏖️',title:'Amager Beach Park',loc:'Copenhagen',tags:['beach','outdoor','free','family'],desc:'Urban beach just 20 minutes from the city centre — sandy beach, swimming lagoon, beach volleyball and watersports.'},
+  {id:'cpH15',emoji:'🚲',title:'Explore by Bicycle',loc:'Copenhagen',tags:['outdoor','free','family'],desc:'Copenhagen is the world\'s most bike-friendly city. Rent bikes (Donkey Republic app) and explore the city like a local.'},
+  {id:'cpH16',emoji:'🖼️',title:'SMK – National Gallery of Denmark',loc:'Copenhagen',tags:['indoor','history','rainy'],desc:'Denmark\'s largest art museum spanning 700 years of art. The permanent collection is free on Tuesdays.'},
+  {id:'cpH17',emoji:'🗿',title:'Ny Carlsberg Glyptotek',loc:'Copenhagen',tags:['indoor','rainy','history'],desc:'Stunning museum of ancient Egyptian, Greek and Roman art plus French and Danish 19th-century art. Beautiful indoor palm garden.'},
+  {id:'cpH18',emoji:'🪑',title:'Designmuseum Danmark',loc:'Copenhagen',tags:['indoor','rainy'],desc:'Explore iconic Danish design from Arne Jacobsen chairs to Bang & Olufsen. Applied arts, fashion and furniture.',link:'https://designmuseum.dk/en'},
+  {id:'cpH19',emoji:'🎷',title:'Copenhagen Jazz Festival (July)',loc:'Copenhagen',tags:['night','outdoor','indoor','free'],desc:'In July the whole city becomes a concert venue — 1,000+ concerts across parks, streets and venues. Many are free!'},
+  {id:'cpH20',emoji:'🌿',title:'Nørrebro Neighbourhood Walk',loc:'Copenhagen',tags:['outdoor','food','free'],desc:'The most vibrant neighbourhood — great coffee shops, vintage stores, street art and diverse food from around the world.'},
+  {id:'cpH21',emoji:'🦆',title:'Botanisk Have (Botanical Garden)',loc:'Copenhagen',tags:['outdoor','free','family'],desc:'Beautiful free botanical gardens in the heart of the city. The Victorian Palm House is spectacular. Perfect for a stroll.'},
+  {id:'cpH22',emoji:'🏄',title:'SUP Paddleboarding in the Harbour',loc:'Copenhagen',tags:['outdoor','beach','family'],desc:'Stand-up paddleboarding in Copenhagen\'s clean harbour. Equipment rental and lessons available near Nyhavn.'},
+
+  // --- HELSINGØR ---
+  {id:'hel1',emoji:'🏰',title:'Kronborg Castle (Hamlet\'s Castle)',loc:'Helsingør',tags:['history','outdoor','family'],desc:'UNESCO World Heritage Site. Shakespeare set Hamlet here. Impressive Renaissance castle with cannon galleries and deep moat.'},
+  {id:'hel2',emoji:'⛴️',title:'Day Trip: Ferry to Sweden',loc:'Helsingør',tags:['outdoor','family'],desc:'Just 20 minutes by ferry to Helsingborg, Sweden! A very easy and fun day trip. Buy tickets at the harbour on the day.'},
+  {id:'hel3',emoji:'🚢',title:'Maritime Museum of Denmark',loc:'Helsingør',tags:['indoor','rainy','history'],desc:'Award-winning museum built into a dry dock below ground level. Denmark\'s incredible seafaring history brought to life.',link:'https://mfs.dk/en'},
+
+  // --- ROSKILDE ---
+  {id:'ros1',emoji:'🛥️',title:'Viking Ship Museum',loc:'Roskilde',tags:['history','indoor','rainy','family','kids'],desc:'Five original Viking ships raised from Roskilde Fjord in 1962. Watch craftspeople build new Viking ships using ancient methods.',link:'https://vikingeskibsmuseet.dk/en'},
+  {id:'ros2',emoji:'⛪',title:'Roskilde Cathedral',loc:'Roskilde',tags:['history','indoor'],desc:'UNESCO World Heritage Site — burial church of 40+ Danish monarchs over 1,000 years. Magnificent Romanesque-Gothic architecture.'},
+  {id:'ros3',emoji:'🚣',title:'Kayaking on Roskilde Fjord',loc:'Roskilde',tags:['outdoor','family'],desc:'Paddle the calm, scenic Roskilde Fjord. Rentals and guided tours available from the Viking Ship Museum.'},
+
+  // --- ODENSE ---
+  {id:'ode1',emoji:'📖',title:'Hans Christian Andersen Museum',loc:'Odense',tags:['history','indoor','rainy','family','kids'],desc:'The world\'s most immersive fairy-tale museum, opened 2021. Beautiful architecture and storytelling experiences.',link:'https://hcandersen.com/en'},
+  {id:'ode2',emoji:'🏘️',title:'Odense Old Town Quarter',loc:'Odense',tags:['outdoor','history','free'],desc:'Beautifully preserved medieval centre with half-timbered houses, cobblestone alleys, and street cafes.'},
+  {id:'ode3',emoji:'🌾',title:'Funen Village Open-Air Museum',loc:'Odense',tags:['outdoor','history','family','kids'],desc:'Living history museum — costumed staff demonstrate 18th–19th century rural life. Farmhouses, animals, craft demonstrations.'},
+  {id:'ode4',emoji:'🎨',title:'Brandts Art Museum',loc:'Odense',tags:['indoor','rainy'],desc:'Contemporary art museum in a converted textile factory with rotating photography and fine art exhibitions.'},
+
+  // --- AARHUS ---
+  {id:'aar1',emoji:'🌈',title:'ARoS Art Museum',loc:'Aarhus',tags:['indoor','rainy','outdoor'],desc:'One of Scandinavia\'s largest art museums. Don\'t miss the rooftop rainbow panorama with breathtaking 360° city views.',link:'https://en.aros.dk'},
+  {id:'aar2',emoji:'🏡',title:'Den Gamle By (The Old Town)',loc:'Aarhus',tags:['outdoor','history','family','kids','rainy'],desc:'The world\'s first open-air urban history museum. Walk through a full reconstructed 18th-century Danish town with costumed staff.'},
+  {id:'aar3',emoji:'🏺',title:'Moesgaard Museum (MOMU)',loc:'Aarhus',tags:['history','indoor','rainy'],desc:'Award-winning museum built into a hillside. Bog people, Vikings and spectacular archaeological finds. Stunning architecture.'},
+  {id:'aar4',emoji:'☕',title:'Aarhus Latin Quarter',loc:'Aarhus',tags:['outdoor','food','free'],desc:'Cobblestone streets with independent cafes, vintage boutiques, street food stalls and the best coffee in Jutland.'},
+  {id:'aar5',emoji:'🦌',title:'Marselisborg Deer Park',loc:'Aarhus',tags:['outdoor','free','family'],desc:'Deer roam freely in this beautiful forested park beside the royal summer palace. Always open, always free.'},
+  {id:'aar6',emoji:'🏖️',title:'Beaches at Aarhus Bay',loc:'Aarhus',tags:['beach','outdoor','free','family'],desc:'Sandy beaches with calm, clean water south of Aarhus. Easy to reach by bus. Perfect for sunny afternoons.'},
+  {id:'aar7',emoji:'🎠',title:'Tivoli Friheden (Aarhus)',loc:'Aarhus',tags:['outdoor','family','kids'],desc:'Aarhus\'s own amusement park in a beautiful forested setting. Great for families and smaller than Copenhagen\'s Tivoli.'},
+
+  // --- AALBORG ---
+  {id:'aal1',emoji:'⛵',title:'Lindholm Høje Viking Burial Site',loc:'Aalborg',tags:['outdoor','history','free'],desc:'One of Scandinavia\'s best-preserved Viking burial sites — 700+ graves outlined in stones on an atmospheric hilltop.'},
+  {id:'aal2',emoji:'🏗️',title:'Utzon Center',loc:'Aalborg',tags:['indoor','rainy'],desc:'Architecture centre designed by Jørn Utzon (Sydney Opera House). Superb waterfront setting with design and art exhibitions.'},
+  {id:'aal3',emoji:'🐠',title:'Aqua Freshwater Aquarium',loc:'Aalborg',tags:['indoor','rainy','family','kids'],desc:'Wonderful freshwater aquarium and nature park in nearby Silkeborg — one of the best family days out in Jutland.'},
+
+  // --- SKAGEN ---
+  {id:'ska1',emoji:'🌊',title:'Grenen — Where Two Seas Meet',loc:'Skagen',tags:['outdoor','beach','free','family'],desc:'The very tip of Denmark where the North Sea and Baltic Sea visibly collide. A dramatic, unique natural wonder.'},
+  {id:'ska2',emoji:'🖼️',title:'Skagens Museum',loc:'Skagen',tags:['indoor','history','rainy'],desc:'Denmark\'s most visited art museum outside Copenhagen — the famous Skagen painters captured the extraordinary Northern light here.'},
+  {id:'ska3',emoji:'⛪',title:'The Sand-Buried Church',loc:'Skagen',tags:['outdoor','history','free'],desc:'A church buried up to its tower by drifting sand dunes over 300 years — an eerie and unique Skagen landmark.'},
+  {id:'ska4',emoji:'🏖️',title:'Skagen Beaches',loc:'Skagen',tags:['beach','outdoor','free','family'],desc:'Some of Denmark\'s most stunning beaches — fine white sand, dramatic dunes and clear water. Go north of town to escape crowds.'},
+  {id:'ska5',emoji:'🐟',title:'Fresh Fish at Skagen Harbour',loc:'Skagen',tags:['food'],desc:'Buy straight-off-the-boat fish at Skagen\'s working harbour. The fish auctions and smokeries are a Danish experience.'},
+
+  // --- BORNHOLM ---
+  {id:'bor1',emoji:'🏯',title:'Hammershus Fortress',loc:'Bornholm',tags:['outdoor','history','free','family'],desc:'Northern Europe\'s largest medieval castle ruin — dramatically perched on cliffs with sweeping sea views. Free to explore.'},
+  {id:'bor2',emoji:'🚲',title:'Cycling Around Bornholm',loc:'Bornholm',tags:['outdoor','family','beach'],desc:'235km of signed cycle routes circle the island. Rent bikes and discover cliffs, forests, beaches and fishing villages.'},
+  {id:'bor3',emoji:'🐟',title:'Bornholm Smoked Herring Experience',loc:'Bornholm',tags:['food'],desc:'Bornholm is famous for røget sild (smoked herring). Visit a traditional røgeri smokehouse — an unmissable island food experience.'},
+  {id:'bor4',emoji:'⛪',title:'Round Churches of Bornholm',loc:'Bornholm',tags:['history','indoor'],desc:'Four unique round medieval churches used for both worship and defence. An architectural curiosity unique to this island.'},
+  {id:'bor5',emoji:'🎨',title:'Bornholm Art Glass Studios',loc:'Bornholm',tags:['indoor','rainy'],desc:'The island has a world-renowned tradition of art glass. Visit open studios and watch glassblowers work.'},
+
+  // --- SILKEBORG ---
+  {id:'sil1',emoji:'🪦',title:'Tollund Man — Museum Silkeborg',loc:'Silkeborg',tags:['history','indoor','rainy'],desc:'The perfectly preserved 2,400-year-old Iron Age bog body known as the Tollund Man. One of the most extraordinary finds ever made.'},
+  {id:'sil2',emoji:'🛶',title:'Canoeing on the Gudenå River',loc:'Silkeborg',tags:['outdoor','family'],desc:'Denmark\'s only real river winds through lakes and forests. Canoe day trips or multi-day adventures — incredibly peaceful.'},
+
+  // --- NATIONWIDE ---
+  {id:'nat1',emoji:'🥪',title:'Try Traditional Smørrebrød',loc:'Nationwide',tags:['food'],desc:'Open-faced rye bread sandwiches — Denmark\'s national lunch dish. Try a proper smørrebrød restaurant for the full experience.'},
+  {id:'nat2',emoji:'🍓',title:'Pick Strawberries at a Farm',loc:'Nationwide',tags:['outdoor','family','kids','free'],desc:'Summer in Denmark means roadside "Jordbær" signs. Stop and pick your own strawberries — cheap, fun and incredibly Danish.'},
+  {id:'nat3',emoji:'🕯️',title:'A Hygge Evening',loc:'Nationwide',tags:['indoor','family','rainy'],desc:'The Danish art of cosy togetherness. Light candles, make coffee, play board games. The heart of Danish culture — can\'t be missed.'},
+  {id:'nat4',emoji:'🎪',title:'Visit a Loppemarked (Flea Market)',loc:'Nationwide',tags:['outdoor','free','family'],desc:'Denmark has excellent summer flea markets (loppemarked). Great hunting for vintage Danish design at very reasonable prices.'},
+  {id:'nat5',emoji:'☕',title:'Konditori — Danish Pastry Café',loc:'Nationwide',tags:['food','rainy','indoor'],desc:'Traditional Danish cake shops. Try kanelsnegle (cinnamon rolls) and wienerbrød with a cup of strong Danish filter coffee.'},
+  {id:'nat6',emoji:'🌅',title:'Watch the Sunset from a Beach',loc:'Nationwide',tags:['outdoor','beach','free','family'],desc:'Danish summer sunsets are spectacular — lasting well past 10pm in June and July. Find a west-facing beach for the best views.'},
+  {id:'nat7',emoji:'🏊',title:'Wild Swimming in a Lake',loc:'Nationwide',tags:['outdoor','beach','free','family'],desc:'Denmark has beautiful lakes for wild swimming, popular all summer. Crystal-clear water, typically free, surrounded by nature.'},
+  {id:'nat8',emoji:'🛒',title:'Explore a Danish Supermarket',loc:'Nationwide',tags:['food'],desc:'Browse Netto, Føtex or Bilka for Danish specialities — rugbrød (rye bread), remoulade, pålæg, and beautiful pastries.'},
+
+  // --- PARIS ---
+  {id:'par1',emoji:'🗼',title:'Eiffel Tower',loc:'Paris',tags:['outdoor','history','family'],desc:'The world\'s most iconic landmark. Book tickets in advance to skip queues. Magical at night when the tower sparkles on the hour.'},
+  {id:'par2',emoji:'🖼️',title:'The Louvre Museum',loc:'Paris',tags:['indoor','history','rainy'],desc:'World\'s largest art museum — home to the Mona Lisa, Venus de Milo and thousands more. Arrive early, allow a full day.'},
+  {id:'par3',emoji:'👑',title:'Palace of Versailles',loc:'Paris',tags:['outdoor','history','family'],desc:'Louis XIV\'s breathtaking royal palace with Hall of Mirrors and vast formal gardens. A 40-min train from Paris. Book ahead.'},
+  {id:'par4',emoji:'⛪',title:'Sacré-Cœur & Montmartre',loc:'Paris',tags:['outdoor','history','free'],desc:'Walk up to the white basilica for stunning Paris views. Explore the artistic village streets, street artists and cafes below.'},
+  {id:'par5',emoji:'🚢',title:'Seine River Cruise',loc:'Paris',tags:['outdoor','family'],desc:'Drift past Notre-Dame, the Louvre and the Eiffel Tower from the water. Bateaux Mouches runs day and evening departures.'},
+  {id:'par6',emoji:'🎨',title:'Musée d\'Orsay',loc:'Paris',tags:['indoor','rainy','history'],desc:'World\'s finest Impressionist collection — Monet, Renoir, Van Gogh and Degas in a stunning converted railway station.'},
+  {id:'par7',emoji:'🥐',title:'Paris Food Walk — Marché & Bakeries',loc:'Paris',tags:['outdoor','food','free'],desc:'Pick up croissants, cheese and charcuterie from a local market. Rue Mouffetard and Marché d\'Aligre are wonderful.'},
+  {id:'par8',emoji:'🌸',title:'Luxembourg Gardens',loc:'Paris',tags:['outdoor','free','family'],desc:'Beautiful formal gardens in the heart of Paris — fountains, chess tables, pony rides and the famous model sailboats.'},
+
+  // --- AMSTERDAM ---
+  {id:'ams1',emoji:'🖼️',title:'Rijksmuseum',loc:'Amsterdam',tags:['indoor','history','rainy'],desc:'The Netherlands\' national museum — Rembrandt\'s Night Watch, Vermeer\'s Milkmaid and 8,000 masterpieces. Book tickets online.'},
+  {id:'ams2',emoji:'📖',title:'Anne Frank House',loc:'Amsterdam',tags:['indoor','history','rainy'],desc:'The secret annexe where Anne Frank hid during WWII. Deeply moving. Tickets MUST be booked weeks in advance online.'},
+  {id:'ams3',emoji:'🌻',title:'Van Gogh Museum',loc:'Amsterdam',tags:['indoor','rainy','history'],desc:'The world\'s largest Van Gogh collection — 200 paintings and 500 drawings in a purpose-built museum. Book ahead.'},
+  {id:'ams4',emoji:'🚤',title:'Amsterdam Canal Boat Tour',loc:'Amsterdam',tags:['outdoor','family'],desc:'Glide through 165 canals and under historic bridges. Pedal boats, glass-topped boats and evening dinner cruises all available.'},
+  {id:'ams5',emoji:'🌷',title:'Keukenhof Tulip Gardens',loc:'Amsterdam',tags:['outdoor','family'],desc:'The world\'s largest flower garden — 7 million bulbs in bloom March to May. An hour from Amsterdam by bus. Breathtaking.'},
+  {id:'ams6',emoji:'🧀',title:'Albert Cuyp Market',loc:'Amsterdam',tags:['outdoor','food','free'],desc:'Amsterdam\'s biggest and most famous street market. Fresh stroopwafels, Dutch cheese, herring and street food every day.'},
+  {id:'ams7',emoji:'🚲',title:'Cycle Through Amsterdam',loc:'Amsterdam',tags:['outdoor','free','family'],desc:'The Netherlands is the world\'s cycling capital. Rent a bike and explore canals, parks and neighbourhoods like a local.'},
+
+  // --- BERLIN ---
+  {id:'ber1',emoji:'🏛️',title:'Brandenburg Gate',loc:'Berlin',tags:['outdoor','history','free'],desc:'Berlin\'s iconic neoclassical monument — symbol of reunification. Free to visit any time. Spectacular at dusk.'},
+  {id:'ber2',emoji:'🧱',title:'East Side Gallery',loc:'Berlin',tags:['outdoor','history','free'],desc:'1.3km of original Berlin Wall preserved as an open-air gallery with murals by 105 artists from around the world. Always open.'},
+  {id:'ber3',emoji:'🏺',title:'Museum Island',loc:'Berlin',tags:['indoor','history','rainy'],desc:'UNESCO World Heritage Site — five world-class museums on an island. The Pergamon with its reconstructed ancient gate is unmissable.'},
+  {id:'ber4',emoji:'☕',title:'Prenzlauer Berg Neighbourhood',loc:'Berlin',tags:['outdoor','food','free'],desc:'Berlin\'s trendiest neighbourhood. Beautiful Wilhelminian buildings, independent cafes, weekend flea markets and street art.'},
+  {id:'ber5',emoji:'🌲',title:'Tiergarten Park',loc:'Berlin',tags:['outdoor','free','family'],desc:'Berlin\'s vast central park — perfect for cycling, picnics and strolling. The Victory Column at its heart has great views.'},
+  {id:'ber6',emoji:'🎨',title:'Topography of Terror',loc:'Berlin',tags:['indoor','history','rainy','free'],desc:'Free museum documenting the SS and Gestapo on the site of their former headquarters. Essential, sobering history.'},
+
+  // --- VIENNA ---
+  {id:'vie1',emoji:'🏰',title:'Schönbrunn Palace',loc:'Vienna',tags:['outdoor','history','family'],desc:'The Habsburg imperial summer palace with 1,441 rooms and stunning formal gardens. Climb to the Gloriette for city views.'},
+  {id:'vie2',emoji:'🎭',title:'Vienna State Opera',loc:'Vienna',tags:['indoor','night','history'],desc:'One of the world\'s greatest opera houses. Book tickets for a performance or join a daytime tour of the magnificent building.'},
+  {id:'vie3',emoji:'🖼️',title:'Kunsthistorisches Museum',loc:'Vienna',tags:['indoor','rainy','history'],desc:'Imperial art museum with one of Europe\'s finest collections — Vermeer, Bruegel, Raphael, Cellini\'s famous golden salt cellar.'},
+  {id:'vie4',emoji:'🎡',title:'Prater & Giant Ferris Wheel',loc:'Vienna',tags:['outdoor','family'],desc:'Vienna\'s vast park and amusement area. The 1897 Riesenrad Ferris Wheel offers great city views and is a Vienna icon.'},
+  {id:'vie5',emoji:'🍫',title:'Sachertorte at Café Sacher',loc:'Vienna',tags:['food','indoor'],desc:'Try Vienna\'s famous chocolate cake at the legendary Hotel Sacher — or queue for Demel\'s version, equally iconic.'},
+  {id:'vie6',emoji:'🎵',title:'Vienna City Hall (Rathaus) Square',loc:'Vienna',tags:['outdoor','free','family'],desc:'In summer the square hosts free open-air film screenings of concerts and opera every evening. A magical Viennese experience.'},
+
+  // --- ROME ---
+  {id:'rom1',emoji:'🏟️',title:'Colosseum',loc:'Rome',tags:['outdoor','history','family'],desc:'The ancient world\'s greatest amphitheatre. Book tickets and timed entry well in advance — queues are enormous without them.'},
+  {id:'rom2',emoji:'⛪',title:'Vatican & Sistine Chapel',loc:'Rome',tags:['indoor','history'],desc:'The world\'s smallest state. Michelangelo\'s Sistine Chapel ceiling is one of humanity\'s greatest artistic achievements. Book early.'},
+  {id:'rom3',emoji:'⛲',title:'Trevi Fountain',loc:'Rome',tags:['outdoor','history','free'],desc:'Baroque masterpiece and the world\'s most famous fountain. Visit at dawn to beat crowds. Toss a coin and make a wish.'},
+  {id:'rom4',emoji:'🏛️',title:'The Pantheon',loc:'Rome',tags:['indoor','history'],desc:'The best-preserved ancient Roman building, with its famous unreinforced concrete dome open to the sky. Entry now ticketed.'},
+  {id:'rom5',emoji:'🍕',title:'Trastevere Food & Evening Walk',loc:'Rome',tags:['outdoor','food','night'],desc:'Rome\'s most charming neighbourhood. Cobblestone lanes, trattorias, street food and aperitivo bars. Best at golden hour.'},
+  {id:'rom6',emoji:'🌹',title:'Campo de\' Fiori Market',loc:'Rome',tags:['outdoor','food','free'],desc:'Rome\'s liveliest morning market — flowers, fruit, vegetables and local produce. Surrounded by cafes for breakfast.'},
+
+  // --- BARCELONA ---
+  {id:'bcn1',emoji:'⛪',title:'Sagrada Família',loc:'Barcelona',tags:['indoor','history','family'],desc:'Gaudí\'s extraordinary unfinished cathedral — 140+ years in construction. Book tickets far in advance. Simply unmissable.'},
+  {id:'bcn2',emoji:'🌿',title:'Park Güell',loc:'Barcelona',tags:['outdoor','history','family'],desc:'Gaudí\'s colourful mosaic park with sweeping city views. Timed entry to the monumental zone required — book ahead.'},
+  {id:'bcn3',emoji:'🛍️',title:'La Rambla & Boqueria Market',loc:'Barcelona',tags:['outdoor','food','free'],desc:'Barcelona\'s famous pedestrian boulevard. Visit La Boqueria market early morning for fresh seafood, fruit and tapas.'},
+  {id:'bcn4',emoji:'🏖️',title:'Barceloneta Beach',loc:'Barcelona',tags:['beach','outdoor','free','family'],desc:'Barcelona\'s city beach — sandy, lively and just a short metro ride from the centre. Busy in summer, best at morning or evening.'},
+  {id:'bcn5',emoji:'🏠',title:'Casa Batlló & Passeig de Gràcia',loc:'Barcelona',tags:['outdoor','history'],desc:'Gaudí\'s extraordinary apartment building on Barcelona\'s finest boulevard. The facade of organic shapes and colours is stunning.'},
+  {id:'bcn6',emoji:'🍷',title:'El Born & Barceloneta Tapas',loc:'Barcelona',tags:['food','outdoor','night'],desc:'El Born is Barcelona\'s hip neighbourhood for tapas, pintxos and wine. Try patatas bravas, jamón and seafood paella.'},
+
+  // --- PRAGUE ---
+  {id:'prg1',emoji:'🏰',title:'Prague Castle',loc:'Prague',tags:['outdoor','history','family'],desc:'The world\'s largest ancient castle complex, dominating the city skyline. Free to walk the grounds; ticket for the cathedral.'},
+  {id:'prg2',emoji:'🌉',title:'Charles Bridge',loc:'Prague',tags:['outdoor','history','free'],desc:'Medieval stone bridge lined with 30 Baroque statues. Visit at dawn for atmosphere; avoid midday crowds. Free always.'},
+  {id:'prg3',emoji:'🕰️',title:'Old Town Square & Astronomical Clock',loc:'Prague',tags:['outdoor','history','free'],desc:'Prague\'s heart — the medieval Astronomical Clock chimes hourly with a mechanical procession. Wonderful Gothic architecture.'},
+  {id:'prg4',emoji:'🍺',title:'Czech Beer Culture',loc:'Prague',tags:['food','indoor'],desc:'Czech Republic has the world\'s highest beer consumption. Try a tankové pivo (tank beer) at a traditional pivnice (pub).'},
+
+  // --- STOCKHOLM ---
+  {id:'sto1',emoji:'⛵',title:'Vasa Museum',loc:'Stockholm',tags:['indoor','history','rainy','family'],desc:'A 17th-century warship that sank on its maiden voyage in 1628, raised intact in 1961. The world\'s best-preserved sailing ship.'},
+  {id:'sto2',emoji:'🎵',title:'ABBA Museum',loc:'Stockholm',tags:['indoor','family'],desc:'Interactive museum dedicated to Sweden\'s most famous pop group. Great fun, with costumes, recording studios and holograms.'},
+  {id:'sto3',emoji:'🏘️',title:'Gamla Stan (Old Town)',loc:'Stockholm',tags:['outdoor','history','free'],desc:'Stockholm\'s 13th-century old town on a tiny island — narrow cobblestone lanes, colourful buildings, royal palace and Nobel Museum.'},
+  {id:'sto4',emoji:'🌲',title:'Djurgården Island',loc:'Stockholm',tags:['outdoor','free','family'],desc:'Car-free island of parks, museums and waterways. Walk or cycle the paths, visit the open-air Skansen museum and see the city views.'},
+
+  // --- BRUGES ---
+  {id:'bru1',emoji:'🚤',title:'Bruges Canal Boat Tour',loc:'Bruges',tags:['outdoor','family'],desc:'See Bruges\' medieval architecture from the water. Short, charming boat rides depart from five spots around the historic centre.'},
+  {id:'bru2',emoji:'🔔',title:'Belfry Tower Climb',loc:'Bruges',tags:['outdoor','history'],desc:'Climb 366 steps up the medieval Belfry for panoramic views of the rooftops of Bruges. The carillon bells are magnificent.'},
+  {id:'bru3',emoji:'🍫',title:'Bruges Chocolate Trail',loc:'Bruges',tags:['food','indoor'],desc:'Bruges has 50+ artisan chocolate shops. Join a tasting tour or simply explore — Belgian chocolate is the world\'s finest.'},
+  {id:'bru4',emoji:'🍺',title:'Belgian Beer Tasting',loc:'Bruges',tags:['food','indoor'],desc:'Belgium has 800+ beers. Try Trappist ales at De Garre or t\'Bruges Beertje — a legendary specialist bar with 300 varieties.'},
+
+  // --- LISBON ---
+  {id:'lis1',emoji:'🚃',title:'Historic Tram 28',loc:'Lisbon',tags:['outdoor','history','family'],desc:'Rattle through Lisbon\'s hilly streets on the iconic yellow tram. Passes Alfama, Graça and Estrela — arrive early to beat crowds.'},
+  {id:'lis2',emoji:'🏯',title:'Belém Tower',loc:'Lisbon',tags:['outdoor','history'],desc:'16th-century Manueline tower on the Tagus River — a symbol of Portugal\'s Age of Discovery. UNESCO World Heritage Site.'},
+  {id:'lis3',emoji:'🥐',title:'Pastéis de Nata at Pastéis de Belém',loc:'Lisbon',tags:['food','indoor'],desc:'The original custard tart shop, open since 1837. The recipe is a closely guarded secret. Queue is worth every minute.'},
+  {id:'lis4',emoji:'🎵',title:'Fado Show in Alfama',loc:'Lisbon',tags:['night','indoor'],desc:'Fado is Portugal\'s haunting traditional music. Experience it in a restaurant in the Alfama neighbourhood on a weekend evening.'},
+
+  // --- ATHENS ---
+  {id:'ath1',emoji:'🏛️',title:'Acropolis & Parthenon',loc:'Athens',tags:['outdoor','history','family'],desc:'The pinnacle of ancient Greek civilisation — the Parthenon temple atop its sacred rock. Visit at opening time to beat the heat and crowds.'},
+  {id:'ath2',emoji:'🏺',title:'Acropolis Museum',loc:'Athens',tags:['indoor','history','rainy'],desc:'World-class modern museum at the foot of the Acropolis showcasing the sculptures and artefacts from its 5,000 years of history.'},
+  {id:'ath3',emoji:'🫒',title:'Athens Central Market (Varvakios)',loc:'Athens',tags:['outdoor','food','free'],desc:'Athens\' vibrant covered market — fresh fish, meat, spices and olives. The raw energy of Greek daily life. Best in the morning.'},
+  {id:'ath4',emoji:'🌅',title:'Sunset at Lycabettus Hill',loc:'Athens',tags:['outdoor','free'],desc:'The highest point in Athens. Hike or take the funicular for a stunning 360° sunset view over the city and the Acropolis.'},
+
+  // --- OSLO ---
+  {id:'osl1',emoji:'⛵',title:'Viking Ship Museum',loc:'Oslo',tags:['indoor','history','rainy','family'],desc:'Three almost complete Viking ships from the 9th century, the finest Viking artefacts in the world. Fascinating and beautiful.'},
+  {id:'osl2',emoji:'🗿',title:'Vigeland Sculpture Park',loc:'Oslo',tags:['outdoor','free','family'],desc:'The world\'s largest sculpture park by one artist — 200+ bronze and granite sculptures by Gustav Vigeland. Always open, free.'},
+  {id:'osl3',emoji:'🌊',title:'Aker Brygge & Oslo Fjord',loc:'Oslo',tags:['outdoor','food'],desc:'Oslo\'s vibrant waterfront district — restaurants, bars, galleries and the Oslo Opera House. Ferry to the fjord islands from here.'},
+
+  // --- BERGEN ---
+  {id:'bgn1',emoji:'🏘️',title:'Bryggen Wharf',loc:'Bergen',tags:['outdoor','history','free'],desc:'UNESCO World Heritage Site — the iconic row of colourful wooden Hanseatic merchant buildings on Bergen\'s old harbour.'},
+  {id:'bgn2',emoji:'🚡',title:'Fløibanen Funicular',loc:'Bergen',tags:['outdoor','family'],desc:'A short funicular ride to the top of Mount Fløyen for breathtaking views over Bergen\'s harbour and surrounding fjords.'},
+  {id:'bgn3',emoji:'🐟',title:'Bergen Fish Market',loc:'Bergen',tags:['outdoor','food'],desc:'One of Norway\'s most famous fish markets. Fresh salmon, shrimp, whale and local delicacies straight from the Norwegian coast.'},
+
+  // --- REYKJAVIK ---
+  {id:'rey1',emoji:'⭕',title:'Golden Circle Day Tour',loc:'Reykjavik',tags:['outdoor','family'],desc:'Iceland\'s most famous route: Þingvellir National Park, the Geysir geothermal area and majestic Gullfoss waterfall. Unforgettable.'},
+  {id:'rey2',emoji:'💦',title:'Blue Lagoon Geothermal Spa',loc:'Reykjavik',tags:['outdoor','family'],desc:'Soak in milky-blue geothermal waters surrounded by lava fields. Book many weeks in advance — sells out quickly.'},
+  {id:'rey3',emoji:'🐋',title:'Whale Watching from Reykjavik',loc:'Reykjavik',tags:['outdoor','family'],desc:'Minke whales, humpbacks and dolphins are commonly spotted in Faxaflói Bay. Tours depart from the Old Harbour year-round.'},
+  {id:'rey4',emoji:'🌌',title:'Northern Lights (Sept–April)',loc:'Reykjavik',tags:['outdoor','night'],desc:'Iceland is one of the best places on Earth to see the Aurora Borealis. Best from September to April on clear, dark nights.'},
+
+  // --- BUDAPEST ---
+  {id:'bud1',emoji:'🏰',title:'Buda Castle & Castle Hill',loc:'Budapest',tags:['outdoor','history','family'],desc:'The medieval royal castle complex rising above the Danube. Walk the cobblestoned Castle Hill district with its towers and museums.'},
+  {id:'bud2',emoji:'🛁',title:'Széchenyi Thermal Baths',loc:'Budapest',tags:['outdoor','family'],desc:'Budapest\'s most famous thermal bath complex — outdoor pools in a stunning Neo-Baroque palace. A uniquely Hungarian experience.'},
+  {id:'bud3',emoji:'🌉',title:'Chain Bridge & Danube Promenade',loc:'Budapest',tags:['outdoor','free','night'],desc:'Walk across the iconic 1849 Chain Bridge at sunset for spectacular views of the Parliament building and Buda Castle.'},
+
+  // --- KRAKOW ---
+  {id:'kra1',emoji:'🏰',title:'Wawel Royal Castle & Cathedral',loc:'Krakow',tags:['indoor','history'],desc:'Poland\'s royal seat for 500 years — a magnificent hilltop castle overlooking the Vistula River with royal state rooms and treasury.'},
+  {id:'kra2',emoji:'🏘️',title:'Krakow Old Town & Rynek Główny',loc:'Krakow',tags:['outdoor','history','free'],desc:'One of Europe\'s best-preserved medieval town squares. The Cloth Hall, St. Mary\'s Basilica and street cafes create an unforgettable scene.'},
+  {id:'kra3',emoji:'🧆',title:'Pierogi & Polish Food Tour',loc:'Krakow',tags:['food'],desc:'Krakow is Poland\'s food capital. Try pierogi (dumplings), bigos (hunter\'s stew), żurek soup and zapiekanka street food.'},
+
+  // --- SALZBURG ---
+  {id:'sal1',emoji:'🎵',title:'Salzburg — Sound of Music Tour',loc:'Salzburg',tags:['outdoor','family','history'],desc:'Follow the filming locations from the 1965 movie through Salzburg\'s lakes and mountains. Guided tours available daily.'},
+  {id:'sal2',emoji:'🏰',title:'Hohensalzburg Fortress',loc:'Salzburg',tags:['outdoor','history','family'],desc:'One of Europe\'s best-preserved medieval castles, perched above the city. Funicular included in ticket. Excellent city views.'},
+  {id:'sal3',emoji:'🎶',title:'Mozart\'s Birthplace',loc:'Salzburg',tags:['indoor','history','rainy'],desc:'The house where Mozart was born in 1756, now a museum. Salzburg was his home and his music fills the city year-round.'},
+];
+
+
+// ============================================================
+// STATE & PERSISTENCE
+// ============================================================
+let S = {
+  tripName: 'Mor & Far\'s European Adventure',
+  tripEmoji: '🌍',
+  tripStart: '2025-06-15',
+  tripEnd: '2025-09-07',
+  locked: false,
+  stays: [],
+  activities: [],
+  ideas: [],
+  wishlist: [],
+  familyMembers: [],
+  calMonth: '2025-06',
+  selectedDay: null,
+};
+
+// Active profile (stored separately so each device can have its own)
+let PROFILE = null;
+
+// ---- PROFILES ----
+function getProfiles() { try { return JSON.parse(localStorage.getItem('dk-profiles')||'[]'); } catch(e){ return []; } }
+function saveProfiles(p) { try { localStorage.setItem('dk-profiles', JSON.stringify(p)); } catch(e){} }
+function getStoredProfileName() { return localStorage.getItem('dk-active-profile')||null; }
+function setStoredProfileName(n) { try { localStorage.setItem('dk-active-profile', n); } catch(e){} }
+
+function addProfile(isOwner) {
+  const name = document.getElementById('newProfileName').value.trim();
+  if (!name) { document.getElementById('newProfileName').style.borderColor='white'; return; }
+  const profiles = getProfiles();
+  if (profiles.find(p => p.name === name)) { toast('Name already exists'); return; }
+  profiles.push({ name, isOwner: !!isOwner });
+  saveProfiles(profiles);
+  renderProfileCards();
+  document.getElementById('newProfileName').value = '';
+}
+
+function deleteProfile(name) {
+  let profiles = getProfiles().filter(p => p.name !== name);
+  saveProfiles(profiles);
+  renderProfileCards();
+}
+
+function login(name) {
+  const profiles = getProfiles();
+  PROFILE = profiles.find(p => p.name === name) || { name, isOwner: false };
+  setStoredProfileName(name);
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.body.style.overflow = '';
+  document.getElementById('profilePill').textContent = `${PROFILE.isOwner?'👑':'👤'} ${PROFILE.name} · Switch`;
+  applyProfileView();
+  renderDashboard();
+}
+
+function switchProfile() {
+  document.getElementById('loginOverlay').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  renderProfileCards();
+}
+
+function applyProfileView() {
+  const isOwner = PROFILE && PROFILE.isOwner;
+  const ownerOnly = ['tab-stays','tab-discover'];
+  ownerOnly.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = isOwner ? '' : 'none';
+  });
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    const target = btn.getAttribute('onclick');
+    if (target && (target.includes("'stays'") || target.includes("'discover'"))) {
+      btn.style.display = isOwner ? '' : 'none';
+    }
+  });
+  const wf = document.getElementById('wishFormWrap');
+  if (wf) wf.style.display = '';
+  const lb = document.getElementById('lockToggleBtn');
+  if (lb) lb.style.display = isOwner ? '' : 'none';
+  const qa = document.getElementById('quickAddCard');
+  if (qa) qa.style.display = isOwner ? '' : 'none';
+}
+
+function renderProfileCards() {
+  const el = document.getElementById('profileCards');
+  if (!el) return;
+  const profiles = getProfiles();
+  if (profiles.length === 0) {
+    el.innerHTML = `<div style="text-align:center;color:rgba(255,255,255,0.6);padding:16px;font-size:0.9rem">No profiles yet — add yourself below!</div>`;
+    return;
+  }
+  el.innerHTML = profiles.map(p => `
+    <div class="profile-card ${p.isOwner?'owner':''}" onclick="login('${p.name}')">
+      <div class="profile-avatar">${p.isOwner?'👑':'👤'}</div>
+      <div>
+        <div class="profile-name">${p.name}</div>
+        <div class="profile-role">${p.isOwner?'Trip Owner · Full access':'Family member · View &amp; suggest'}</div>
+      </div>
+      <button class="profile-delete" onclick="event.stopPropagation();deleteProfile('${p.name}')" title="Remove">×</button>
+    </div>
+  `).join('');
+}
+
+function load() {
+  try { const s = localStorage.getItem('dk-planner-v2'); if (s) { const p = JSON.parse(s); S = {...S, ...p}; } } catch(e){}
+  if (!S.wishlist) S.wishlist = [];
+  if (!S.familyMembers) S.familyMembers = [];
+  if (!S.tripName) S.tripName = 'Mor & Far\'s European Adventure';
+  if (!S.tripEmoji) S.tripEmoji = '🌍';
+  if (S.locked === undefined) S.locked = false;
+}
+function save() {
+  try { localStorage.setItem('dk-planner-v2', JSON.stringify(S)); } catch(e){}
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function fmtDate(d) {
+  if (!d) return '';
+  return new Date(d + 'T12:00:00').toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
+}
+function daysBetween(a, b) {
+  return Math.round((new Date(b+'T12:00:00') - new Date(a+'T12:00:00')) / 86400000);
+}
+function today() { return new Date().toISOString().split('T')[0]; }
+function stayAt(date) { return S.stays.find(s => s.from <= date && s.to >= date); }
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2400);
+}
+function tagHtml(tags) {
+  const map = {outdoor:['tag-outdoor','Outdoor'],indoor:['tag-indoor','Indoor'],food:['tag-food','Food'],history:['tag-history','History'],beach:['tag-beach','Beach'],night:['tag-night','Evening'],family:['tag-family','Family'],free:['tag-free','Free'],rainy:['tag-rainy','Rainy Day'],kids:['tag-kids','Kids']};
+  return (tags||[]).map(t=>{ const m=map[t]||['tag-indoor',t]; return `<span class="tag ${m[0]}">${m[1]}</span>`; }).join('');
+}
+function weatherUrl(city) {
+  const co = {
+    Copenhagen:'55.6761,12.5683', Frederiksberg:'55.6761,12.5683', 'Helsingør':'56.0356,12.6136',
+    Roskilde:'55.6415,12.0803', Odense:'55.4038,10.4024', Aarhus:'56.1629,10.2039',
+    Aalborg:'57.0488,9.9217', Skagen:'57.7222,10.5753', Bornholm:'55.1026,14.9093',
+    Silkeborg:'56.1701,9.5487', Vejle:'55.7093,9.5334',
+    Paris:'48.8566,2.3522', Nice:'43.7102,7.2620', Lyon:'45.7640,4.8357',
+    Bordeaux:'44.8378,-0.5792', Marseille:'43.2965,5.3698',
+    Berlin:'52.5200,13.4050', Munich:'48.1351,11.5820', Hamburg:'53.5753,10.0153',
+    Cologne:'50.9333,6.9500', Frankfurt:'50.1109,8.6821',
+    Rome:'41.9028,12.4964', Florence:'43.7696,11.2558', Venice:'45.4408,12.3155',
+    Milan:'45.4654,9.1859', Naples:'40.8518,14.2681',
+    Barcelona:'41.3851,2.1734', Madrid:'40.4168,-3.7038', Seville:'37.3891,-5.9845',
+    Malaga:'36.7213,-4.4214',
+    Amsterdam:'52.3676,4.9041', 'The Hague':'52.0705,4.3007',
+    Vienna:'48.2082,16.3738', Salzburg:'47.8095,13.0550', Innsbruck:'47.2692,11.4041',
+    Prague:'50.0755,14.4378',
+    Lisbon:'38.7223,-9.1393', Porto:'41.1579,-8.6291',
+    Athens:'37.9838,23.7275', Santorini:'36.3932,25.4615', Crete:'35.2401,24.8093',
+    Stockholm:'59.3293,18.0686', Gothenburg:'57.7089,11.9746',
+    Brussels:'50.8503,4.3517', Bruges:'51.2093,3.2247',
+    Zurich:'47.3769,8.5417', Geneva:'46.2044,6.1432', Interlaken:'46.6863,7.8632',
+    Oslo:'59.9139,10.7522', Bergen:'60.3913,5.3221',
+    Reykjavik:'64.1466,-21.9426',
+    Krakow:'50.0647,19.9450', Warsaw:'52.2297,21.0122',
+    Budapest:'47.4979,19.0402',
+  };
+  return co[city] ? `https://www.yr.no/en/forecast/daily-table/${co[city]}` : `https://www.yr.no/en/search?q=${encodeURIComponent(city)}`;
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function showTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const tabEl = document.getElementById('tab-'+name);
+  if (tabEl) tabEl.classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(name==='itinerary') renderCalendar();
+  if(name==='discover') renderDiscover();
+  if(name==='dashboard') renderDashboard();
+  if(name==='stays') renderStays();
+  if(name==='ask') renderIdeas();
+  if(name==='trips') renderTripsTab();
+  if(name==='family') renderFamilyTab();
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function renderDashboard() {
+  const t = today();
+  const total = daysBetween(S.tripStart, S.tripEnd);
+  const elapsed = Math.max(0, Math.min(total, daysBetween(S.tripStart, t)));
+  const left = Math.max(0, daysBetween(t, S.tripEnd));
+  const pct = total > 0 ? Math.round(elapsed/total*100) : 0;
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statDone').textContent = elapsed;
+  document.getElementById('statLeft').textContent = left;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('tripPill').textContent = `Day ${elapsed} of ${total}`;
+  document.getElementById('tripDateDisplay').innerHTML =
+    `${fmtDate(S.tripStart)} &rarr; ${fmtDate(S.tripEnd)}`;
+
+  const stay = stayAt(t);
+  const nowLoc = document.getElementById('nowLocation');
+  const nowDet = document.getElementById('nowDetail');
+  const nowW = document.getElementById('nowWeather');
+  document.getElementById('headerSub').textContent = stay ? `📍 ${stay.city}` : 'Mor & Far\'s European Adventure';
+
+  if (stay) {
+    nowLoc.textContent = stay.city;
+    nowLoc.style.color = 'var(--text)';
+    const remaining = daysBetween(t, stay.to);
+    nowDet.textContent = (stay.neighbourhood ? stay.neighbourhood + ' · ' : '') + `${remaining} day${remaining!==1?'s':''} left in ${stay.city}`;
+    nowW.innerHTML = `<a class="weather-link" href="${weatherUrl(stay.city)}" target="_blank" rel="noopener">🌤️ Weather in ${stay.city} — Yr.no</a>`;
+  } else if (t < S.tripStart) {
+    nowLoc.textContent = 'Trip not started yet';
+    nowLoc.style.color = 'var(--muted)';
+    const daysUntil = daysBetween(t, S.tripStart);
+    nowDet.textContent = `Arriving in ${daysUntil} day${daysUntil!==1?'s':''}!`;
+    nowW.innerHTML = `<a class="weather-link" href="https://www.yr.no/en/search?q=Europe" target="_blank" rel="noopener">🌤️ Europe Weather — Yr.no</a>`;
+  } else if (t > S.tripEnd) {
+    nowLoc.textContent = 'Trip has ended';
+    nowLoc.style.color = 'var(--muted)';
+    nowDet.textContent = 'What an adventure!';
+    nowW.innerHTML = '';
+  } else {
+    nowLoc.textContent = 'No stay set for today';
+    nowLoc.style.color = 'var(--muted)';
+    nowDet.textContent = 'Go to "My Stays" to add where you\'re staying.';
+    nowW.innerHTML = `<a class="weather-link" href="https://www.yr.no/en/search?q=Europe" target="_blank" rel="noopener">🌤️ Europe Weather — Yr.no</a>`;
+  }
+
+  const qd = document.getElementById('qDate');
+  if (!qd.value) {
+    qd.value = t >= S.tripStart && t <= S.tripEnd ? t : S.tripStart;
+    qd.min = S.tripStart;
+    qd.max = S.tripEnd;
+  }
+
+  renderSuggestions(stay);
+}
+
+function refreshSuggestions() {
+  renderSuggestions(stayAt(today()));
+}
+
+function renderSuggestions(stay) {
+  const el = document.getElementById('todaySuggestions');
+  let pool = DB.filter(a => !S.activities.some(x => x.srcId === a.id));
+  if (stay) pool = pool.filter(a => a.loc === stay.city || a.loc === 'Nationwide');
+  if (pool.length === 0 && stay) pool = DB.filter(a => a.loc === 'Nationwide' && !S.activities.some(x => x.srcId === a.id));
+  if (pool.length === 0) { el.innerHTML = '<p class="text-sm text-muted">You\'ve added all suggestions! Discover more in the Discover tab.</p>'; return; }
+  const picks = pool.sort(() => Math.random()-0.5).slice(0,4);
+  el.innerHTML = picks.map(a => actCard(a, true)).join('');
+}
+
+// ============================================================
+// STAYS
+// ============================================================
+function toggleCustomCity() {
+  const v = document.getElementById('stayCity').value;
+  document.getElementById('customCityWrap').style.display = v==='other' ? 'block' : 'none';
+}
+
+function addStay() {
+  const sel = document.getElementById('stayCity').value;
+  const custom = document.getElementById('stayCustomCity').value.trim();
+  const city = sel === 'other' ? custom : sel;
+  const from = document.getElementById('stayFrom').value;
+  const to = document.getElementById('stayTo').value;
+  const neighbourhood = document.getElementById('stayNeighbourhood').value.trim();
+  const accomm = document.getElementById('stayAccomm').value.trim();
+
+  if (!city) { toast('Please select a city'); return; }
+  if (!from || !to) { toast('Please set arriving and leaving dates'); return; }
+  if (from > to) { toast('Arriving must be before leaving'); return; }
+
+  S.stays.push({ id: Date.now()+'', city, from, to, neighbourhood, accomm });
+  S.stays.sort((a,b) => a.from.localeCompare(b.from));
+  save();
+  renderStays();
+  renderDashboard();
+  toast(`Stay in ${city} saved!`);
+
+  ['stayCity','stayCustomCity','stayFrom','stayTo','stayNeighbourhood','stayAccomm'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('customCityWrap').style.display = 'none';
+}
+
+function deleteStay(id) {
+  S.stays = S.stays.filter(s => s.id !== id);
+  save();
+  renderStays();
+  renderDashboard();
+  toast('Stay removed');
+}
+
+function renderStays() {
+  const el = document.getElementById('staysList');
+  if (!el) return;
+  if (S.stays.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="big">🗺️</div><p>No stays added yet.<br>Tell the app where you'll be and when!</p></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="card"><div class="section-title">📅 Your European Journey</div><div class="timeline">` +
+    S.stays.map(s => {
+      const days = daysBetween(s.from, s.to);
+      const t = today();
+      const isCurrent = t >= s.from && t <= s.to;
+      return `<div class="timeline-item">
+        <div class="timeline-dot" style="${isCurrent?'background:var(--red);box-shadow:0 0 0 3px rgba(107,163,190,0.3)':''}"></div>
+        <div class="stay-card" style="${isCurrent?'border-color:var(--red);':''}">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              ${isCurrent ? '<span style="font-size:0.72rem;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.05em">▶ Currently here</span><br>' : ''}
+              <span class="stay-loc">📍 ${s.city}</span>
+              ${s.neighbourhood ? `<div class="stay-detail">${s.neighbourhood}</div>` : ''}
+              ${s.accomm ? `<div class="stay-detail">🏨 ${s.accomm}</div>` : ''}
+              <div class="stay-dates">${fmtDate(s.from)} → ${fmtDate(s.to)} · ${days} day${days!==1?'s':''}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;margin-left:10px">
+              <a class="weather-link" href="${weatherUrl(s.city)}" target="_blank" rel="noopener" style="font-size:0.78rem;padding:5px 10px">🌤️ Weather</a>
+              <button class="btn btn-secondary btn-sm" onclick="deleteStay('${s.id}')">Remove</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }).join('') + `</div></div>`;
+}
+
+// ============================================================
+// ACTIVITIES
+// ============================================================
+function quickAdd() {
+  const title = document.getElementById('qTitle').value.trim();
+  const date = document.getElementById('qDate').value;
+  const time = document.getElementById('qTime').value;
+  const cat = document.getElementById('qCategory').value;
+  const notes = document.getElementById('qNotes').value.trim();
+
+  if (!title) { toast('Please enter an activity name'); return; }
+  if (!date) { toast('Please choose a date'); return; }
+
+  const stay = stayAt(date);
+  S.activities.push({ id: Date.now()+'', title, date, time, cat, notes, loc: stay?stay.city:'', emoji:'📌', type:'manual' });
+  save();
+  renderAllActs();
+  renderDashboard();
+  toast(`"${title}" added!`);
+  document.getElementById('qTitle').value = '';
+  document.getElementById('qTime').value = '';
+  document.getElementById('qNotes').value = '';
+}
+
+function addFromDB(actId, dateOverride) {
+  const a = DB.find(x => x.id === actId);
+  if (!a) return;
+  const stay = S.stays.find(s => s.city === a.loc);
+  const date = dateOverride || (stay ? stay.from : S.tripStart);
+  S.activities.push({ id: Date.now()+'', title: a.title, date, time:'', cat: a.tags[0]||'outdoor', notes: a.desc, loc: a.loc, emoji: a.emoji, type:'suggested', srcId: a.id });
+  save();
+  renderAllActs();
+  renderSuggestions(stayAt(today()));
+  renderDiscover();
+  toast(`"${a.title}" added to itinerary!`);
+  if (S.selectedDay && dateOverride) renderDayPanel(S.selectedDay);
+}
+
+function deleteAct(id) {
+  S.activities = S.activities.filter(a => a.id !== id);
+  save();
+  renderAllActs();
+  if(S.selectedDay) renderDayPanel(S.selectedDay);
+  renderCalendar();
+  toast('Activity removed');
+}
+
+function renderAllActs() {
+  const el = document.getElementById('allActList');
+  const cnt = document.getElementById('actCount');
+  if (!el) return;
+  cnt.textContent = S.activities.length;
+  if (S.activities.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="big">📅</div><p>No activities yet. Add them from the Home tab, Discover, or Ask!</p></div>`;
+    return;
+  }
+  const sorted = [...S.activities].sort((a,b) => {
+    const dc = a.date.localeCompare(b.date);
+    return dc || (a.time||'').localeCompare(b.time||'');
+  });
+  el.innerHTML = sorted.map(a => `
+    <div class="activity-item">
+      <div class="act-emoji">${a.emoji||'📌'}</div>
+      <div class="act-body">
+        <div class="act-title">${a.title}</div>
+        <div class="act-meta">${fmtDate(a.date)}${a.time?' · '+a.time:''}${a.loc?' · '+a.loc:''}</div>
+        ${a.notes?`<div class="act-desc">${a.notes}</div>`:''}
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="deleteAct('${a.id}')" title="Remove">✕</button>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// DRAG & DROP
+// ============================================================
+let dragActId = null;
+
+function startDrag(actId, event) {
+  dragActId = actId;
+  event.dataTransfer.effectAllowed = 'move';
+  event.dataTransfer.setData('text/plain', actId);
+  setTimeout(() => {
+    const el = document.querySelector(`[data-act-id="${actId}"]`);
+    if (el) el.classList.add('dragging');
+  }, 0);
+}
+
+function endDrag(actId) {
+  dragActId = null;
+  const el = document.querySelector(`[data-act-id="${actId}"]`);
+  if (el) el.classList.remove('dragging');
+  document.querySelectorAll('.cal-day.drag-over').forEach(d => d.classList.remove('drag-over'));
+}
+
+function calDragOver(ds, event) {
+  if (!dragActId) return;
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'move';
+  event.currentTarget.classList.add('drag-over');
+}
+
+function calDragLeave(event) {
+  event.currentTarget.classList.remove('drag-over');
+}
+
+function dropOnDay(ds, event) {
+  event.preventDefault();
+  event.currentTarget.classList.remove('drag-over');
+  const id = dragActId || event.dataTransfer.getData('text/plain');
+  if (!id) return;
+  const act = S.activities.find(a => a.id === id);
+  if (!act || act.date === ds) { dragActId = null; return; }
+  const oldDate = act.date;
+  act.date = ds;
+  const stay = stayAt(ds);
+  if (stay) act.loc = stay.city;
+  dragActId = null;
+  save();
+  S.selectedDay = ds;
+  renderCalendar();
+  renderDayPanel(ds);
+  toast(`Moved from ${fmtDate(oldDate)} → ${fmtDate(ds)}`);
+}
+
+// ============================================================
+// CALENDAR
+// ============================================================
+function renderCalendar() {
+  const [yr, mo] = S.calMonth.split('-').map(Number);
+  document.getElementById('calMonthLabel').textContent = new Date(yr,mo-1,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  const grid = document.getElementById('calGrid');
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  let html = days.map(d=>`<div class="cal-head">${d}</div>`).join('');
+  const first = new Date(yr, mo-1, 1);
+  let dow = first.getDay() - 1; if (dow < 0) dow = 6;
+  const dim = new Date(yr, mo, 0).getDate();
+  const t = today();
+  for (let i=0; i<dow; i++) html += `<div class="cal-day other-month"></div>`;
+  for (let d=1; d<=dim; d++) {
+    const ds = `${yr}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const inTrip = ds >= S.tripStart && ds <= S.tripEnd;
+    const hasAct = S.activities.some(a=>a.date===ds);
+    const isToday = ds === t;
+    const isSel = ds === S.selectedDay;
+    let cls = 'cal-day';
+    if (isSel) cls += ' selected';
+    else if (inTrip) cls += ' in-trip';
+    if (isToday) cls += ' today';
+    if (hasAct) cls += ' has-activity';
+    const stay = stayAt(ds);
+    html += `<div class="${cls}" onclick="selectDay('${ds}')" title="${stay?stay.city:''}" ondragover="calDragOver('${ds}',event)" ondragleave="calDragLeave(event)" ondrop="dropOnDay('${ds}',event)">${d}</div>`;
+  }
+  grid.innerHTML = html;
+  renderAllActs();
+}
+
+function prevMonth() {
+  const [y,m] = S.calMonth.split('-').map(Number);
+  const d = new Date(y, m-2, 1);
+  S.calMonth = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  renderCalendar();
+}
+function nextMonth() {
+  const [y,m] = S.calMonth.split('-').map(Number);
+  const d = new Date(y, m, 1);
+  S.calMonth = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  renderCalendar();
+}
+
+function selectDay(ds) {
+  S.selectedDay = ds;
+  renderCalendar();
+  renderDayPanel(ds);
+}
+
+function renderDayPanel(ds) {
+  const wrap = document.getElementById('dayPanelWrap');
+  const stay = stayAt(ds);
+  const acts = S.activities.filter(a=>a.date===ds).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  const suggestions = DB.filter(a=>(a.loc===(stay?stay.city:'Nationwide')||a.loc==='Nationwide')&&!S.activities.some(x=>x.srcId===a.id)).slice(0,4);
+
+  wrap.innerHTML = `<div class="day-panel">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+      <div>
+        <div class="day-panel-title">${fmtDate(ds)}</div>
+        ${stay ? `<div class="text-sm" style="color:var(--red);margin-top:2px">📍 ${stay.city}${stay.neighbourhood?' · '+stay.neighbourhood:''}</div>` :
+          '<div class="text-sm text-muted">No stay set — go to My Stays tab</div>'}
+      </div>
+      ${stay ? `<a class="weather-link" href="${weatherUrl(stay.city)}" target="_blank" rel="noopener" style="font-size:0.78rem;padding:5px 10px;flex-shrink:0">🌤️ Weather</a>` : ''}
+    </div>
+
+    ${acts.length===0 ? '<p class="text-sm text-muted" style="margin-bottom:10px">Nothing planned yet for this day.</p>' :
+      `<div class="drag-hint">⠿ Drag any activity onto a calendar date above to reschedule it</div>` +
+      acts.map(a=>`<div class="activity-item" style="margin-bottom:8px" draggable="true" data-act-id="${a.id}" ondragstart="startDrag('${a.id}',event)" ondragend="endDrag('${a.id}')">
+        <div class="drag-handle" title="Drag to reschedule">⠿</div>
+        <div class="act-emoji">${a.emoji||'📌'}</div>
+        <div class="act-body">
+          <div class="act-title">${a.title}${a.time?` <span class="text-muted text-sm">· ${a.time}</span>`:''}</div>
+          ${a.notes?`<div class="act-desc">${a.notes}</div>`:''}
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="deleteAct('${a.id}')">✕</button>
+      </div>`).join('')}
+
+    <hr class="divider">
+    <div class="flex gap-2">
+      <input class="input" id="dayActInput" placeholder="Add something for this day…">
+      <button class="btn btn-primary btn-sm" onclick="addDayAct('${ds}')">Add</button>
+    </div>
+
+    ${suggestions.length>0 ? `<div style="margin-top:14px">
+      <div class="text-sm font-bold text-muted" style="text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">${stay?'Suggestions for '+stay.city:'Suggestions'}</div>
+      ${suggestions.map(a=>`<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:1.2rem">${a.emoji}</span>
+        <div style="flex:1">
+          <div class="text-sm font-bold">${a.title}</div>
+          <div style="font-size:0.76rem">${tagHtml(a.tags)}</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="addFromDB('${a.id}','${ds}')">+ Add</button>
+      </div>`).join('')}
+    </div>` : ''}
+  </div>`;
+}
+
+function addDayAct(date) {
+  const inp = document.getElementById('dayActInput');
+  const title = inp.value.trim();
+  if (!title) return;
+  const stay = stayAt(date);
+  S.activities.push({id:Date.now()+'',title,date,time:'',cat:'outdoor',notes:'',loc:stay?stay.city:'',emoji:'📌',type:'manual'});
+  save();
+  renderDayPanel(date);
+  renderCalendar();
+  toast(`"${title}" added!`);
+}
+
+// ============================================================
+// DISCOVER
+// ============================================================
+function actCard(a, compact) {
+  const added = S.activities.some(x=>x.srcId===a.id);
+  return `<div class="activity-item">
+    <div class="act-emoji">${a.emoji}</div>
+    <div class="act-body">
+      <div class="act-title">${a.title}${!compact?` <span class="text-muted text-sm">· ${a.loc}</span>`:''}${a.link?` <a href="${a.link}" target="_blank" rel="noopener" style="font-size:0.76rem;color:var(--blue);text-decoration:none">↗</a>`:''}</div>
+      <div class="act-desc">${a.desc}</div>
+      <div style="margin-top:5px">${tagHtml(a.tags)}</div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="addFromDB('${a.id}')" ${added?'disabled style="opacity:.4"':''}>${added?'✓ Added':'+ Add'}</button>
+  </div>`;
+}
+
+function renderDiscover() {
+  const city = document.getElementById('discCity')?.value || 'all';
+  const cat = document.getElementById('discCat')?.value || 'all';
+  let pool = DB;
+  if (city!=='all') pool = pool.filter(a=>a.loc===city);
+  if (cat!=='all') pool = pool.filter(a=>a.tags&&a.tags.includes(cat));
+
+  const el = document.getElementById('discoverResults');
+  if (!el) return;
+  if (pool.length===0) { el.innerHTML=`<div class="empty-state"><div class="big">🔍</div><p>No activities match your filters.</p></div>`; return; }
+
+  const byLoc = {};
+  pool.forEach(a=>{ if(!byLoc[a.loc]) byLoc[a.loc]=[]; byLoc[a.loc].push(a); });
+
+  el.innerHTML = Object.entries(byLoc).map(([loc,acts])=>`
+    <div class="card">
+      <div class="section-title">📍 ${loc}</div>
+      ${acts.map(a=>actCard(a,false)).join('')}
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// ASK
+// ============================================================
+function ask(q) { document.getElementById('askInput').value = q; doAsk(); }
+
+function doAsk() {
+  const raw = document.getElementById('askInput').value.trim();
+  if (!raw) return;
+  const kws = raw.toLowerCase().split(/\s+/);
+  const scored = DB.map(a => {
+    const haystack = [a.title,a.desc,a.loc,...(a.tags||[])].join(' ').toLowerCase();
+    let score = 0;
+    kws.forEach(k=>{
+      if(haystack.includes(k)) score+=2;
+      if(a.loc.toLowerCase().includes(k)) score+=3;
+      if((a.tags||[]).some(t=>t.includes(k))) score+=2;
+    });
+    return {...a,score};
+  }).filter(a=>a.score>0).sort((a,b)=>b.score-a.score);
+
+  const el = document.getElementById('askResults');
+  if (!el) return;
+  if (scored.length===0) { el.innerHTML=`<div class="card"><p class="text-sm text-muted">No matches found. Try words like: outdoor, beach, Copenhagen, museum, food, kids, free, rainy day…</p></div>`; return; }
+  el.innerHTML = `<div class="card">
+    <div class="section-title">Found ${scored.length} idea${scored.length!==1?'s':''}</div>
+    ${scored.slice(0,14).map(a=>actCard(a,false)).join('')}
+  </div>`;
+}
+
+// ============================================================
+// IDEAS
+// ============================================================
+function addIdea() {
+  const inp = document.getElementById('ideaInput');
+  const text = inp.value.trim();
+  if(!text) return;
+  S.ideas.push({id:Date.now()+'',text});
+  save();
+  renderIdeas();
+  inp.value='';
+  toast('Idea saved!');
+}
+function deleteIdea(id) { S.ideas=S.ideas.filter(i=>i.id!==id); save(); renderIdeas(); }
+function renderIdeas() {
+  const el = document.getElementById('ideaList');
+  if(!el) return;
+  if(S.ideas.length===0) { el.innerHTML='<p class="text-sm text-muted">No ideas yet.</p>'; return; }
+  el.innerHTML = S.ideas.map(i=>`
+    <div class="idea-item">
+      <span class="text-sm">💡 ${i.text}</span>
+      <button class="btn btn-secondary btn-sm" onclick="deleteIdea('${i.id}')">✕</button>
+    </div>`).join('');
+}
+
+// ============================================================
+// TRIPS TAB
+// ============================================================
+function renderTripsTab() {
+  const ni = document.getElementById('tripNameInput');
+  const ei = document.getElementById('tripEmojiInput');
+  const si = document.getElementById('tripStartInput');
+  const ti = document.getElementById('tripEndInput');
+  if (ni) ni.value = S.tripName || '';
+  if (ei) ei.value = S.tripEmoji || '🌍';
+  if (si) si.value = S.tripStart;
+  if (ti) ti.value = S.tripEnd;
+
+  const badge = document.getElementById('tripLockBadge');
+  if (badge) {
+    badge.textContent = S.locked ? '🔒 Locked' : '✏️ Planning';
+    badge.style.background = S.locked ? '#d1fae5' : 'var(--accent-light)';
+    badge.style.color = S.locked ? '#065f46' : 'var(--red)';
+  }
+
+  renderTripSummary();
+  renderSnapshots();
+}
+
+function saveTripMeta() {
+  S.tripName = document.getElementById('tripNameInput').value.trim() || S.tripName;
+  S.tripEmoji = document.getElementById('tripEmojiInput').value.trim() || '🌍';
+  const s = document.getElementById('tripStartInput').value;
+  const e = document.getElementById('tripEndInput').value;
+  if (s) S.tripStart = s;
+  if (e) S.tripEnd = e;
+  save();
+  renderDashboard();
+  renderTripsTab();
+  toast('Trip details saved!');
+}
+
+function renderTripSummary() {
+  const el = document.getElementById('tripSummaryEl');
+  if (!el) return;
+  const total = daysBetween(S.tripStart, S.tripEnd);
+  const cities = [...new Set(S.stays.map(s => s.city))];
+  const pending = (S.wishlist||[]).filter(w => w.status==='pending').length;
+
+  el.innerHTML = `
+    <div class="stats-row" style="margin-bottom:12px">
+      <div class="stat-box"><div class="stat-num">${total}</div><div class="stat-label">Trip Days</div></div>
+      <div class="stat-box"><div class="stat-num">${S.activities.length}</div><div class="stat-label">Activities</div></div>
+      <div class="stat-box"><div class="stat-num">${S.stays.length}</div><div class="stat-label">Stays</div></div>
+    </div>
+    ${cities.length>0 ? `<div class="text-sm" style="margin-bottom:8px">📍 ${cities.map(c=>`<span class="trip-chip">${c}</span>`).join('')}</div>` : ''}
+    <div class="text-sm text-muted">${fmtDate(S.tripStart)} → ${fmtDate(S.tripEnd)}</div>
+    ${pending>0?`<div class="text-sm" style="color:#f59e0b;margin-top:6px;font-weight:600">⏳ ${pending} wishlist suggestion${pending!==1?'s':''} awaiting your decision</div>`:''}
+    <div class="mt-2 text-sm">Status: <strong style="color:${S.locked?'#059669':'var(--blue)'}">${S.locked?'🔒 Locked – plan finalised':'✏️ In planning'}</strong></div>
+  `;
+}
+
+function saveSnapshot() {
+  const snaps = JSON.parse(localStorage.getItem('dk-snaps')||'[]');
+  snaps.unshift({
+    id: Date.now()+'',
+    label: `${S.tripEmoji||'🌍'} ${S.tripName||'Trip'} — ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}`,
+    savedAt: Date.now(),
+    tripName: S.tripName,
+    tripEmoji: S.tripEmoji,
+    tripStart: S.tripStart,
+    tripEnd: S.tripEnd,
+    stays: JSON.parse(JSON.stringify(S.stays)),
+    activities: JSON.parse(JSON.stringify(S.activities)),
+    locked: S.locked,
+  });
+  if (snaps.length > 15) snaps.pop();
+  localStorage.setItem('dk-snaps', JSON.stringify(snaps));
+  renderSnapshots();
+  toast('Snapshot saved!');
+}
+
+function renderSnapshots() {
+  const el = document.getElementById('snapshotsList');
+  if (!el) return;
+  const snaps = JSON.parse(localStorage.getItem('dk-snaps')||'[]');
+  if (snaps.length===0) {
+    el.innerHTML = '<p class="text-sm text-muted">No snapshots yet.</p>';
+    return;
+  }
+  el.innerHTML = snaps.map(s=>`
+    <div class="stay-card" style="margin-bottom:9px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <div>
+          <div class="font-bold">${s.label}</div>
+          <div class="text-sm text-muted">${s.activities.length} activities · ${s.stays.length} stays${s.locked?' · 🔒':''}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <button class="btn btn-ghost btn-sm" onclick="restoreSnapshot('${s.id}')">Restore</button>
+          <button class="btn btn-secondary btn-sm" onclick="deleteSnapshot('${s.id}')">✕</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function restoreSnapshot(id) {
+  if (!confirm('Restore this snapshot? Your current data will be overwritten.')) return;
+  const snaps = JSON.parse(localStorage.getItem('dk-snaps')||'[]');
+  const s = snaps.find(x=>x.id===id);
+  if (!s) return;
+  Object.assign(S, { tripName:s.tripName, tripEmoji:s.tripEmoji, tripStart:s.tripStart, tripEnd:s.tripEnd, stays:s.stays, activities:s.activities, locked:s.locked });
+  save();
+  renderDashboard(); renderStays(); renderTripsTab();
+  toast('Snapshot restored!');
+}
+
+function deleteSnapshot(id) {
+  let snaps = JSON.parse(localStorage.getItem('dk-snaps')||'[]').filter(s=>s.id!==id);
+  localStorage.setItem('dk-snaps', JSON.stringify(snaps));
+  renderSnapshots();
+  toast('Snapshot deleted');
+}
+
+// ============================================================
+// FAMILY TAB
+// ============================================================
+function renderFamilyTab() {
+  renderLockBanner();
+  renderMemberChips();
+  renderWishPersonSelect();
+  renderWishlist();
+  const lb = document.getElementById('lockToggleBtn');
+  if (lb) lb.textContent = S.locked ? '🔓 Unlock Plan' : '🔒 Lock Plan';
+  if (PROFILE && !PROFILE.isOwner) {
+    const sel = document.getElementById('wishPerson');
+    if (sel) {
+      const opt = [...sel.options].find(o=>o.value===PROFILE.name);
+      if (opt) sel.value = PROFILE.name;
+    }
+  }
+}
+
+function renderLockBanner() {
+  const b = document.getElementById('familyLockBanner');
+  if (b) b.style.display = S.locked ? 'flex' : 'none';
+  const wf = document.getElementById('wishFormWrap');
+  if (wf) wf.style.display = (S.locked && !(PROFILE&&PROFILE.isOwner)) ? 'none' : '';
+}
+
+function toggleLock() {
+  if (!(PROFILE&&PROFILE.isOwner)) { toast('Only the trip owner can lock/unlock'); return; }
+  S.locked = !S.locked;
+  save();
+  renderLockBanner();
+  renderTripSummary();
+  renderTripsTab();
+  const lb = document.getElementById('lockToggleBtn');
+  if (lb) lb.textContent = S.locked ? '🔓 Unlock Plan' : '🔒 Lock Plan';
+  toast(S.locked ? '🔒 Plan locked! Family can view.' : '✏️ Plan unlocked — editing enabled');
+}
+
+function addMember() {
+  const inp = document.getElementById('memberInput');
+  const name = inp.value.trim();
+  if (!name) return;
+  if (S.familyMembers.includes(name)) { toast('Already added'); return; }
+  S.familyMembers.push(name);
+  save();
+  renderMemberChips();
+  renderWishPersonSelect();
+  inp.value = '';
+  toast(`${name} added to family!`);
+}
+
+function removeMember(name) {
+  S.familyMembers = S.familyMembers.filter(m=>m!==name);
+  save();
+  renderMemberChips();
+  renderWishPersonSelect();
+}
+
+function renderMemberChips() {
+  const el = document.getElementById('memberChips');
+  if (!el) return;
+  if (S.familyMembers.length===0) { el.innerHTML='<p class="text-sm text-muted">No family members yet.</p>'; return; }
+  el.innerHTML = S.familyMembers.map(m=>`
+    <span class="trip-chip">👤 ${m} <button onclick="removeMember('${m}')" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:1rem;margin-left:4px;padding:0;line-height:1">×</button></span>
+  `).join('');
+}
+
+function renderWishPersonSelect() {
+  const el = document.getElementById('wishPerson');
+  if (!el) return;
+  el.innerHTML = '<option value="">— Select person —</option>' +
+    S.familyMembers.map(m=>`<option value="${m}">${m}</option>`).join('');
+}
+
+function addWish() {
+  const person = document.getElementById('wishPerson').value;
+  const title  = document.getElementById('wishTitle').value.trim();
+  const notes  = document.getElementById('wishNotes').value.trim();
+  const date   = document.getElementById('wishDate').value;
+  if (!person) { toast('Please select who is suggesting this'); return; }
+  if (!title)  { toast('Please enter what they\'d love to do'); return; }
+  S.wishlist.push({ id:Date.now()+'', person, title, notes, date, status:'pending' });
+  save();
+  renderWishlist();
+  renderTripSummary();
+  document.getElementById('wishTitle').value='';
+  document.getElementById('wishNotes').value='';
+  document.getElementById('wishDate').value='';
+  toast(`"${title}" added to wishlist!`);
+}
+
+function approveWish(id) {
+  if (!(PROFILE&&PROFILE.isOwner)) { toast('Only the owner can approve items'); return; }
+  const w = S.wishlist.find(x=>x.id===id);
+  if (!w) return;
+  w.status = 'approved';
+  const stay = w.date ? stayAt(w.date) : null;
+  S.activities.push({ id:Date.now()+'', title:w.title, date:w.date||S.tripStart, time:'', cat:'family', notes:(w.notes?w.notes+'\n':'')+'Suggested by '+w.person, loc:stay?stay.city:'', emoji:'⭐', type:'wishlist' });
+  save();
+  renderWishlist();
+  renderAllActs();
+  renderTripSummary();
+  toast(`✅ "${w.title}" approved & added to itinerary!`);
+}
+
+function declineWish(id) {
+  if (!(PROFILE&&PROFILE.isOwner)) { toast('Only the owner can decline items'); return; }
+  const w = S.wishlist.find(x=>x.id===id);
+  if (w) { w.status='declined'; save(); renderWishlist(); }
+}
+
+function deleteWish(id) {
+  S.wishlist = S.wishlist.filter(w=>w.id!==id);
+  save();
+  renderWishlist();
+}
+
+function renderWishlist() {
+  const el = document.getElementById('wishlistItems');
+  if (!el) return;
+  const filter = document.getElementById('wishFilter')?.value||'all';
+  let items = filter==='all' ? S.wishlist : S.wishlist.filter(w=>w.status===filter);
+  if (items.length===0) {
+    el.innerHTML=`<div class="empty-state"><div class="big">🌟</div><p>${filter==='all'?'No wishes yet. Add what the family would love to do!':'No '+filter+' items.'}</p></div>`;
+    return;
+  }
+  const sc = { pending:{dot:'dot-pending',label:'Pending',clr:'#92400e'}, approved:{dot:'dot-approved',label:'✅ Approved',clr:'#065f46'}, declined:{dot:'dot-declined',label:'❌ Declined',clr:'#991b1b'} };
+  const isOwner = PROFILE && PROFILE.isOwner;
+  el.innerHTML = items.map(w=>{
+    const c = sc[w.status]||sc.pending;
+    return `<div class="wish-card">
+      <div class="wish-status-dot ${c.dot}" style="margin-top:5px"></div>
+      <div class="act-body">
+        <div class="act-title">${w.title}</div>
+        <div class="act-meta">👤 ${w.person}${w.date?' · '+fmtDate(w.date):''} · <span style="color:${c.clr};font-weight:700">${c.label}</span></div>
+        ${w.notes?`<div class="act-desc">${w.notes}</div>`:''}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">
+        ${(isOwner && w.status!=='approved') ? `<button class="btn btn-ghost btn-sm" onclick="approveWish('${w.id}')" title="Approve">✅</button>` : ''}
+        ${(isOwner && w.status!=='declined') ? `<button class="btn btn-secondary btn-sm" onclick="declineWish('${w.id}')" title="Decline">❌</button>` : ''}
+        ${isOwner ? `<button class="btn btn-secondary btn-sm" onclick="deleteWish('${w.id}')" title="Delete">🗑️</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function exportWishlist() {
+  const data = { v:1, tripName:S.tripName, tripStart:S.tripStart, tripEnd:S.tripEnd, familyMembers:S.familyMembers, wishlist:S.wishlist, exportedAt:new Date().toISOString() };
+  document.getElementById('exportArea').style.display='block';
+  document.getElementById('exportText').value = JSON.stringify(data, null, 2);
+}
+
+function copyExport() {
+  const ta = document.getElementById('exportText');
+  if (!ta) return;
+  navigator.clipboard?.writeText(ta.value).then(()=>toast('Copied!')).catch(()=>{ ta.select(); document.execCommand('copy'); toast('Copied!'); });
+}
+
+function importWishlist() {
+  const text = prompt('Paste the exported data here:');
+  if (!text) return;
+  try {
+    const data = JSON.parse(text);
+    let added = 0;
+    if (data.wishlist) {
+      const existIds = new Set(S.wishlist.map(w=>w.id));
+      data.wishlist.forEach(w=>{ if(!existIds.has(w.id)){ S.wishlist.push(w); added++; } });
+    }
+    if (data.familyMembers) data.familyMembers.forEach(m=>{ if(!S.familyMembers.includes(m)) S.familyMembers.push(m); });
+    save();
+    renderFamilyTab();
+    toast(`Imported ${added} new wish${added!==1?'es':''}!`);
+  } catch(e) { toast('Invalid data — could not import'); }
+}
+
+// ============================================================
+// TRIP DATE EDIT
+// ============================================================
+function editTripDates() {
+  const s = prompt('Trip start date (YYYY-MM-DD):', S.tripStart);
+  if(!s || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return;
+  const e = prompt('Trip end date (YYYY-MM-DD):', S.tripEnd);
+  if(!e || !/^\d{4}-\d{2}-\d{2}$/.test(e)) return;
+  S.tripStart = s; S.tripEnd = e;
+  save();
+  renderDashboard();
+  toast('Trip dates updated!');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+load();
+(function() {
+  const activeName = localStorage.getItem('dk-active-profile');
+  if (activeName) {
+    const profiles = getProfiles();
+    PROFILE = profiles.find(p => p.name === activeName) || null;
+    if (PROFILE) {
+      document.getElementById('profilePill').textContent = `${PROFILE.isOwner?'👑':'👤'} ${PROFILE.name} · Switch`;
+      applyProfileView();
+    }
+  }
+  if (!PROFILE) {
+    renderProfileCards();
+    document.getElementById('loginOverlay').style.display = 'flex';
+  }
+})();
+renderDashboard();
+renderStays();
+renderIdeas();
+</script>
+</body>
+</html>
